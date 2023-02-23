@@ -4,25 +4,62 @@ using UnityEngine;
 
 public class Board_Data
 {
-    Piece_Data[,] Pieces;
+    Piece_Data[,] boardPieces;
+    int boardSize;
 
-    Board_Data()
+    public Board_Data()
     {
-        Pieces = new Piece_Data[8,8];
-        for (int y = 0; y < 8; y++)
+        boardSize = 8;
+        boardPieces = new Piece_Data[boardSize, boardSize];
+        for (int y = 0; y < boardSize; y++)
         {
-            for (int x = 0; x < 8; x++)
+            for (int x = 0; x < boardSize; x++)
             {
                 if (y <= 1)
                 {
-                    Pieces[x, y] = new Piece_Data(true);
+                    boardPieces[x, y] = new Piece_Data(true, new Vector2Int(x, y) );
                 }
-                else if (y >= 6)
+                else if (y >= boardSize - 2)
                 {
-                    Pieces[x, y] = new Piece_Data(false);
+                    boardPieces[x, y] = new Piece_Data(false, new Vector2Int(x, y));
                 }
-                else Pieces[x,y] = null;
+                else boardPieces[x,y] = null;
             }
         }
     }
+
+    public Piece_Data GetPiece(int x, int y)
+    {
+        return boardPieces[x,y];
+    }
+
+    public bool MovePiece(Piece_Data piece, int moveX, int moveY)
+    {
+        int newXPos = piece.positionOnBoard.x + moveX;
+        int newYPos = piece.positionOnBoard.y + moveY;
+
+        if (ValidMove(newXPos, newYPos) == false) return false;
+
+        boardPieces[newXPos,newYPos] = piece;
+        boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
+        piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
+
+
+        return true;
+    }
+
+    private bool ValidMove(int newXPos, int newYPos)
+    {
+        if (newXPos > boardSize || newXPos < 0) return false;
+        if (newYPos > boardSize || newYPos < 0) return false;
+
+        if (boardPieces[newXPos, newYPos] == null) {
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
 }
