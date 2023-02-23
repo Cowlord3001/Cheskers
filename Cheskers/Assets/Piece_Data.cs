@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class  Piece_Data
 {
-    enum State {pawn, bishop, knight, rook, queen, king};
+    public enum State {pawn, bishop, knight, rook, queen, king};
     State state;
     bool IsWhite;
     bool IsKing;
