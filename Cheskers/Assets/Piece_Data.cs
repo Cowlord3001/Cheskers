@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class  Piece_Data
 {
+    public GameObject gameObject;
     public enum State {pawn, bishop, knight, rook, queen, king};
     State state;
     public enum Color { white, black };

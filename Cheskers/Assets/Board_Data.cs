@@ -6,8 +6,8 @@ using UnityEngine.tvOS;
 
 public class Board_Data
 {
-    Piece_Data[,] boardPieces;
-    int boardSize;
+    public Piece_Data[,] boardPieces { get; private set; }
+    public int size { get; private set; }
 
     //Event for when pieces are removed from board in case we want some effect to play in another script
     public event EventHandler<PieceRemovedEventArgs> OnPieceRemovedFromBoard;
@@ -28,17 +28,17 @@ public class Board_Data
 
     public Board_Data()
     {
-        boardSize = 8;
-        boardPieces = new Piece_Data[boardSize, boardSize];
-        for (int y = 0; y < boardSize; y++)
+        size = 8;
+        boardPieces = new Piece_Data[size, size];
+        for (int y = 0; y < size; y++)
         {
-            for (int x = 0; x < boardSize; x++)
+            for (int x = 0; x < size; x++)
             {
                 if (y <= 1)
                 {
                     boardPieces[x, y] = new Piece_Data(Piece_Data.Color.white, new Vector2Int(x, y) );
                 }
-                else if (y >= boardSize - 2)
+                else if (y >= size - 2)
                 {
                     boardPieces[x, y] = new Piece_Data(Piece_Data.Color.black, new Vector2Int(x, y));
                 }
@@ -63,6 +63,7 @@ public class Board_Data
 
             int moveValidateResult = ValidMove(piece.getColor(), newXPos, newYPos);
 
+            //Only Pawns need this extra check but some checkers rules need this too???
             if (move.requiresTargetPiece == false) {
                 if (moveValidateResult != MOVING_TO_ILLIGAL_SPACE) {
                     legalMoves.Add(new Vector2Int(newXPos, newYPos));
@@ -88,7 +89,7 @@ public class Board_Data
             while (x != endX && y != endY) {
                 //Normalize move to -1 or 1
                 //Could probably just use -1 and 1 in the slidingmove rules
-                //However what if some affect halfs movement???
+                //However what if some effect half movement???
                 x += move.changeInX/Mathf.Abs(move.changeInX); 
                 y += move.changeInY/Mathf.Abs(move.changeInY);
 
@@ -168,8 +169,8 @@ public class Board_Data
 
     private int ValidMove(Piece_Data.Color color, int newXPos, int newYPos)
     {
-        if (newXPos > boardSize || newXPos < 0) return MOVING_TO_ILLIGAL_SPACE;
-        if (newYPos > boardSize || newYPos < 0) return MOVING_TO_ILLIGAL_SPACE;
+        if (newXPos > size || newXPos < 0) return MOVING_TO_ILLIGAL_SPACE;
+        if (newYPos > size || newYPos < 0) return MOVING_TO_ILLIGAL_SPACE;
 
         if (boardPieces[newXPos, newYPos] == null) {
             return MOVING_TO_EMPTY;
