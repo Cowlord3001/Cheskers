@@ -13,5 +13,29 @@ MonoBehaviour:
   m_Name: King
   m_EditorClassIdentifier: 
   chessPiece: 5
-  moves: []
+  moves:
+  - requiresTargetPiece: 0
+    changeInX: 1
+    changeInY: 1
+  - requiresTargetPiece: 0
+    changeInX: 1
+    changeInY: -1
+  - requiresTargetPiece: 0
+    changeInX: -1
+    changeInY: 1
+  - requiresTargetPiece: 0
+    changeInX: -1
+    changeInY: -1
+  - requiresTargetPiece: 0
+    changeInX: 1
+    changeInY: 0
+  - requiresTargetPiece: 0
+    changeInX: 0
+    changeInY: 1
+  - requiresTargetPiece: 0
+    changeInX: -1
+    changeInY: 0
+  - requiresTargetPiece: 0
+    changeInX: 0
+    changeInY: -1
   slidingMoves: []

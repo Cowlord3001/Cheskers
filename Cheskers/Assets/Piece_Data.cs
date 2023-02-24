@@ -10,7 +10,7 @@ public class  Piece_Data
     Color color;
     bool IsWhite;
     bool IsKing;
-    bool IsDamaged;
+    public bool IsDamaged;
     
     public Vector2Int positionOnBoard;
 
