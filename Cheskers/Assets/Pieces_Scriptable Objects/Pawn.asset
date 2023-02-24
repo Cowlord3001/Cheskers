@@ -14,23 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chessPiece: 0
   moves:
-  - requiresPiece: 0
-    changeInX: 0
+  - requiresTargetPiece: 1
+    changeInX: 1
     changeInY: 1
-    requiresRow: 1
-    rowRequired: 0200000006000000
-  - requiresPiece: 1
-    changeInX: 0
-    changeInY: 1
-    requiresRow: 0
-    rowRequired: 
-  - requiresPiece: 1
+  - requiresTargetPiece: 1
     changeInX: -1
     changeInY: 1
-    requiresRow: 0
-    rowRequired: 
-  - requiresPiece: 1
-    changeInX: -1
+  - requiresTargetPiece: 0
+    changeInX: 0
     changeInY: 1
-    requiresRow: 0
-    rowRequired: 

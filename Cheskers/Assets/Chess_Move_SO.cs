@@ -8,18 +8,22 @@ public class Chess_Move_SO : ScriptableObject
     public Piece_Data.State chessPiece;
 
     public Move[] moves;
-
+    public SlidingMove[] slidingMoves;
 
 }
 
 [System.Serializable]
 public struct Move
 {
-    public bool requiresPiece;
+    public bool requiresTargetPiece;
     public int changeInX;
     public int changeInY;
 
+}
 
-    public bool requiresRow;
-    public int[] rowRequired;
+[System.Serializable]
+public struct SlidingMove
+{
+    public int changeInX;
+    public int changeInY;
 }
