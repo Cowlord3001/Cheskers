@@ -9,22 +9,25 @@ public class Board_Setup : MonoBehaviour
     [SerializeField] GameObject blackTile;
     [SerializeField] GameObject whiteTile;
     public static Board_Data boardData { get; private set; }
+    public static GameObject[,] boardTiles { get; private set; }
 
     [SerializeField] GameObject whitePiece;
     [SerializeField] GameObject blackPiece;
 
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        CreateBoard();
         CreateBoard_Data();
+        CreateBoard();
+
     }
 
     void CreateBoard_Data()
     {
         //Creates Board and Piece
         boardData = new Board_Data();
+
         //Fill with white or black pieces
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
@@ -58,6 +61,31 @@ public class Board_Setup : MonoBehaviour
 
     void CreateBoard()
     {
+
+        boardTiles = new GameObject[boardData.size, boardData.size];
+        float halfWidth = boardData.size / 2;
+        float tileWidth = .5f;
+        bool isWhite = true;
+        for (int y = 0; y < boardData.size; y++) {
+            for (int x = 0; x < boardData.size; x++) {
+                if(isWhite == true) {
+                    isWhite = false;
+                    GameObject go = Instantiate(whiteTile);
+                    go.transform.position = new Vector2(x - halfWidth + tileWidth, y - halfWidth + tileWidth);
+                    go.transform.parent = transform;
+                    boardTiles[x, y] = go;
+                }
+                else {
+                    isWhite = true;
+                    GameObject go = Instantiate(blackTile);
+                    go.transform.position = new Vector2(x - halfWidth + tileWidth, y - halfWidth + tileWidth);
+                    go.transform.parent = transform;
+                    boardTiles[x, y] = go;
+                }
+            }
+            isWhite = !isWhite;
+        }
+        /*
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 4; x++) {
                 if (y % 2 == 0) //y is even
@@ -67,9 +95,11 @@ public class Board_Setup : MonoBehaviour
                     GameObject go = Instantiate(blackTile, transform.position,Quaternion.identity);
                     go.transform.position = new Vector2(x1, y1);
                     go.transform.parent = transform;
+                    boardTiles[x, y] = go;
                     go = Instantiate(whiteTile);
                     go.transform.position = new Vector2(x1 + 1, y1);
                     go.transform.parent = transform;
+                    boardTiles[x + 1, y] = go;
                 }
                 else //y is odd
                 {
@@ -78,18 +108,19 @@ public class Board_Setup : MonoBehaviour
                     GameObject go = Instantiate(blackTile, transform.position, Quaternion.identity);
                     go.transform.position = new Vector2(x1, y1);
                     go.transform.parent = transform;
+                    boardTiles[x, y] = go;
                     go = Instantiate(whiteTile, transform.position, Quaternion.identity);
                     go.transform.position = new Vector2(x1 - 1, y1);
                     go.transform.parent = transform;
+                    boardTiles[x - 1, y] = go;
                 }
             }
         }
+        */
     }
     // Update is called once per frame
     void Update()
     {
-        if(Piece_Detection.GetPieceUnderMouse() != null) {
-            Debug.Log(Piece_Detection.GetPieceUnderMouse().positionOnBoard);
-        }
+
     }
 }

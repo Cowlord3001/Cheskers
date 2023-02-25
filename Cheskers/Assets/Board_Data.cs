@@ -6,6 +6,7 @@ using UnityEngine.tvOS;
 
 public class Board_Data
 {
+    public static string debugMessage;
     public Piece_Data[,] boardPieces { get; private set; }
     public int size { get; private set; }
 
@@ -28,6 +29,7 @@ public class Board_Data
 
     public Board_Data()
     {
+        debugMessage = "";
         size = 8;
         boardPieces = new Piece_Data[size, size];
         for (int y = 0; y < size; y++)
@@ -52,12 +54,12 @@ public class Board_Data
         return boardPieces[x,y];
     }
 
-    public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Move[] moves, SlidingMove[] slidingmoves)
+    public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
     {
         List<Vector2Int> legalMoves = new List<Vector2Int>();
 
         //Handle Preset Moves
-        foreach (Move move in moves) {
+        foreach (Move move in chessMoves.moves) {
             int newXPos = piece.positionOnBoard.x + move.changeInX;
             int newYPos = piece.positionOnBoard.y + move.changeInY;
 
@@ -76,22 +78,23 @@ public class Board_Data
                 }
             }
         }
-
+        int i = 0;
         //Sliding Move
-        foreach(SlidingMove move in slidingmoves) {
+        foreach(SlidingMove move in chessMoves.slidingMoves) {
             int moveValidateResult = -1;
-
+            i++;
             int x = piece.positionOnBoard.x;
             int endX = piece.positionOnBoard.x + move.changeInX;
             int y = piece.positionOnBoard.y;
             int endY = piece.positionOnBoard.x + move.changeInY;
-
-            while (x != endX && y != endY) {
+            while (x != endX || y != endY) {
                 //Normalize move to -1 or 1
                 //Could probably just use -1 and 1 in the slidingmove rules
-                //However what if some effect half movement???
-                x += move.changeInX/Mathf.Abs(move.changeInX); 
-                y += move.changeInY/Mathf.Abs(move.changeInY);
+                //However what if some effect causes half movement???
+                if(Mathf.Abs(move.changeInX) > 0)
+                    x += move.changeInX/Mathf.Abs(move.changeInX); 
+                if(Mathf.Abs(move.changeInY) > 0)
+                    y += move.changeInY/Mathf.Abs(move.changeInY);
 
                 //Validate position
                 moveValidateResult = ValidMove(piece.getColor(), x, y);
@@ -106,7 +109,7 @@ public class Board_Data
                     break;
                 }
                 else {
-                    //One illegal move stops the entire slide.
+                    //One illegal move stops the rest of the slide.
                     break;
                 }
             }
@@ -180,8 +183,8 @@ public class Board_Data
 
     private int ValidMove(Piece_Data.Color color, int newXPos, int newYPos)
     {
-        if (newXPos > size || newXPos < 0) return MOVING_TO_ILLIGAL_SPACE;
-        if (newYPos > size || newYPos < 0) return MOVING_TO_ILLIGAL_SPACE;
+        if (newXPos > size - 1 || newXPos < 0) return MOVING_TO_ILLIGAL_SPACE;
+        if (newYPos > size - 1 || newYPos < 0) return MOVING_TO_ILLIGAL_SPACE;
 
         if (boardPieces[newXPos, newYPos] == null) {
             return MOVING_TO_EMPTY;
