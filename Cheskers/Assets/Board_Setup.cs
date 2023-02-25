@@ -8,7 +8,7 @@ public class Board_Setup : MonoBehaviour
 {
     [SerializeField] GameObject blackTile;
     [SerializeField] GameObject whiteTile;
-    Board_Data boardData;
+    public static Board_Data boardData { get; private set; }
 
     [SerializeField] GameObject whitePiece;
     [SerializeField] GameObject blackPiece;
@@ -49,20 +49,10 @@ public class Board_Setup : MonoBehaviour
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
                 if (boardData.boardPieces[x, y] != null) {
-                    boardData.boardPieces[x, y].gameObject.transform.position = BoardtoWorld(x, y);
+                    boardData.boardPieces[x, y].gameObject.transform.position = boardData.BoardIndextoWorld(x, y);
                 }
             }
         }
-    }
-    Vector2 BoardtoWorld(int boardPositionx, int boardPositiony)
-    {
-        Vector2 worldPosition = Vector2.zero;
-        float halfWidth = boardData.size/2;
-        float halfPieceSize = .5f;
-        worldPosition.x = boardPositionx - halfWidth + halfPieceSize;
-        worldPosition.y = boardPositiony - halfWidth + halfPieceSize;
-
-        return worldPosition;
     }
     
 
@@ -98,6 +88,8 @@ public class Board_Setup : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(Piece_Detection.GetPieceUnderMouse() != null) {
+            Debug.Log(Piece_Detection.GetPieceUnderMouse().positionOnBoard);
+        }
     }
 }

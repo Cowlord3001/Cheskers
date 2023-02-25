@@ -153,6 +153,17 @@ public class Board_Data
         return true;
     }
 
+    public Vector2 BoardIndextoWorld(int boardPositionx, int boardPositiony)
+    {
+        Vector2 worldPosition = Vector2.zero;
+        float halfWidth = size / 2;
+        float halfTileSize = .5f;
+        worldPosition.x = boardPositionx - halfWidth + halfTileSize;
+        worldPosition.y = boardPositiony - halfWidth + halfTileSize;
+
+        return worldPosition;
+    }
+
     private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
     {
         //Fire Remove Piece Event
