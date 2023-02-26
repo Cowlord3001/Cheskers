@@ -5,8 +5,9 @@ using UnityEngine;
 public class  Piece_Data
 {
     public GameObject gameObject;
-    public enum Type {pawn, bishop, knight, rook, queen, king};
-    Type state;
+    public enum Type {pawn, bishop, knight, rook, queen, king, none};
+    public Type type = Type.none;
+    public bool hasMoved;
     public enum Color { white, black };
     Color color;
     bool IsWhite;

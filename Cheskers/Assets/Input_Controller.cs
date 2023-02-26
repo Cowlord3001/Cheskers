@@ -21,7 +21,7 @@ public class Input_Controller : MonoBehaviour
     {
         instance = this;
         rollPieceAgain.onClick.AddListener(() => RollPieceAgain());
-        rollPieceAgain.onClick.AddListener(() => EndTurn());
+        endTurn.onClick.AddListener(() => EndTurn());
     }
 
     void RollPieceAgain()
@@ -39,7 +39,7 @@ public class Input_Controller : MonoBehaviour
     {
         mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if(Input.GetMouseButtonDown(0)) {
-            float halfWidth = Board_Setup.boardData.size / 2;
+            float halfWidth = Board_Display.boardData.size / 2;
             //Only count clicks on the board to prevent button double clicks
             if (mouseWorldPosition.x <  halfWidth &&
                 mouseWorldPosition.x > -halfWidth &&

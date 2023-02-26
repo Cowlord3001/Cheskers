@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using UnityEngine;
 
-public class Board_Setup : MonoBehaviour
+public class Board_Display : MonoBehaviour
 {
     [SerializeField] GameObject blackTile;
     [SerializeField] GameObject whiteTile;
@@ -43,16 +43,17 @@ public class Board_Setup : MonoBehaviour
             }
         }
 
-        UpdatePiecesPositions();
+        UpdatePiecesPositionsInGame();
 
     }
 
-    public static void UpdatePiecesPositions()
+    public static void UpdatePiecesPositionsInGame()
     {
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
                 if (boardData.boardPieces[x, y] != null) {
-                    boardData.boardPieces[x, y].gameObject.transform.position = boardData.BoardIndextoWorld(x, y);
+                    GameObject go = boardData.boardPieces[x, y].gameObject;
+                    go.transform.position = boardData.BoardIndextoWorld(x, y);
                 }
             }
         }

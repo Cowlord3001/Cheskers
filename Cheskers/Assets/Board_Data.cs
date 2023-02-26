@@ -57,6 +57,18 @@ public class Board_Data
     public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
     {
         List<Vector2Int> legalMoves = new List<Vector2Int>();
+
+        if (chessMoves.pieceType == Piece_Data.Type.pawn) {
+            List<Vector2Int> extraPawnMoves = GetExtraPawnMoves(piece);
+
+            if(extraPawnMoves.Count > 0) {
+                foreach (Vector2Int move in extraPawnMoves) {
+                    legalMoves.Add(move);
+                }
+            }
+
+        }
+
         //Handle Preset Moves
         foreach (Move move in chessMoves.moves) {
             int newXPos = piece.positionOnBoard.x + move.changeInX;
@@ -68,7 +80,7 @@ public class Board_Data
 
             //Pawn Logic! They can only move in one direction so skip move if its
             //The wrong direction.
-            if (chessMoves.chessPiece == Piece_Data.Type.pawn) {
+            if (chessMoves.pieceType == Piece_Data.Type.pawn) {
                 if(piece.getColor() == Piece_Data.Color.white && move.changeInY < 0) {
                     continue;
                 }
@@ -134,16 +146,43 @@ public class Board_Data
         return legalMoves;
     }
 
+    List<Vector2Int> GetExtraPawnMoves(Piece_Data piece)
+    {
+        List<Vector2Int> ExtraMoves = new List<Vector2Int>();
+
+        if(piece.hasMoved == false) {
+            int newXpos = piece.positionOnBoard.x;
+            int newYpos;
+            if (piece.getColor() == Piece_Data.Color.white) {
+                newYpos = piece.positionOnBoard.y + 2;
+            }
+            else {
+                newYpos = piece.positionOnBoard.y - 2;
+            }
+
+            int moveValidateResult = ValidMove(piece.getColor(), newXpos, newYpos);
+
+            if(moveValidateResult == MOVING_TO_EMPTY) {
+                ExtraMoves.Add(new Vector2Int(newXpos, newYpos));
+            }
+        }
+
+
+        return ExtraMoves;
+    }
+
     public bool MovePiece(Piece_Data piece, int newXPos, int newYPos)
     {
 
         int moveValidateResult = ValidMove(piece.getColor(), newXPos, newYPos);
 
-        //If move is illigal return false for failed move
+        //If move is illigal return false for failed move shouldnt happen
         if (moveValidateResult == MOVING_TO_ILLIGAL_SPACE) return false;
-
         //Moving to enemy piece it should be damaged or removed
-        else if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
+
+        piece.hasMoved = true;
+
+        if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
 
             if(boardPieces[newXPos, newYPos].IsDamaged == true) {
                 RemovePiece(piece, newXPos, newYPos);
@@ -165,8 +204,9 @@ public class Board_Data
                 }
             }
         }
+
         //Moving to EmptySpace
-        else if(moveValidateResult == MOVING_TO_EMPTY) {
+        if(moveValidateResult == MOVING_TO_EMPTY) {
             boardPieces[newXPos, newYPos] = piece;
             boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
             piece.positionOnBoard = new Vector2Int(newXPos, newYPos);

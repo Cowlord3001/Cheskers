@@ -18,7 +18,7 @@ public static class Piece_Detection
 
         Vector2Int boardIndicies = WorldtoBoardIndex(mousePosition.x, mousePosition.y);
 
-        return Board_Setup.boardData.boardPieces[boardIndicies.x, boardIndicies.y];
+        return Board_Display.boardData.boardPieces[boardIndicies.x, boardIndicies.y];
 
     }
 
@@ -36,7 +36,7 @@ public static class Piece_Detection
     static Vector2Int WorldtoBoardIndex(float x, float y)
     {
         Vector2Int BoardIndices = Vector2Int.zero;
-        float halfWidth = Board_Setup.boardData.size / 2;
+        float halfWidth = Board_Display.boardData.size / 2;
         float halfTileSize = .5f;
 
         BoardIndices.x = Mathf.RoundToInt(x + halfWidth - halfTileSize);
