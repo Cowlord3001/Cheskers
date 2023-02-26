@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a80d8f99c8a270a4583b73616c8ec4f8, type: 3}
   m_Name: Rook
   m_EditorClassIdentifier: 
-  chessPiece: 3
+  pieceType: 0
+  spriteBlackNoDamage: {fileID: 21300000, guid: 45cf4dcf5ef67fd4387f3529251b0a0e, type: 3}
+  spriteBlackDamaged: {fileID: 21300000, guid: 280de240cd1376a43b4ec9c94be1feda, type: 3}
+  spriteWhiteNoDamage: {fileID: 21300000, guid: 64e21833a9e36ff44a36cf700e9c7382, type: 3}
+  spriteWhiteDamaged: {fileID: 21300000, guid: fb118b9bf6e5ad240b2ae89ecdbcb63b, type: 3}
   moves: []
   slidingMoves:
   - changeInX: 8

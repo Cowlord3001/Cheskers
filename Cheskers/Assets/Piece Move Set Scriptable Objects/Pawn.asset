@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a80d8f99c8a270a4583b73616c8ec4f8, type: 3}
   m_Name: Pawn
   m_EditorClassIdentifier: 
-  chessPiece: 0
+  pieceType: 0
+  spriteBlackNoDamage: {fileID: 21300000, guid: b6f2cd30791a505489953a89748dac2f, type: 3}
+  spriteBlackDamaged: {fileID: 21300000, guid: 8af89c4240780c8448fedadd05400827, type: 3}
+  spriteWhiteNoDamage: {fileID: 21300000, guid: 45097925faa66134f9053011beda32e5, type: 3}
+  spriteWhiteDamaged: {fileID: 21300000, guid: d44f9fdaf0ee51e48a5c162e808c7189, type: 3}
   moves:
   - requiresTargetPiece: 1
     changeInX: 1
