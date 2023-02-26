@@ -1,29 +1,29 @@
 The game is played using a standard 8x8 chess board using two sets of 16 identical pieces: one set white and one set black.
 These pieces are arranged in the two rows closest to their respective players.
 
-> King Piece: Each player rolls a d20. This decides which piece is their “king” (3 = bottom-left piece, 18 = top-right piece).
+> VIP Piece: Each player rolls a d20. This decides which piece is their VIP (3 = bottom-left piece, 18 = top-right piece).
   Keep this piece a secret, as once it is defeated, the other player wins.
-  - On a 19-20, the player decides on their king’s location.
-  - On a 1-2, the opposing player decides on the king’s location.
+  - On a 19-20, the player decides on their VIP’s location.
+  - On a 1-2, the opposing player decides on the VIP’s location.
 
 > Turn Order: Each player draws a 5-card hand from a standard 52-card deck. Whoever has the best poker hand chooses who goes first.
 
 > Moving: To move a piece, a player must first declare which piece they are moving. Once this decision is made, roll 1d6 to decide how the piece moves for this round.
-  If the piece is unble to move, or the player does not like the roll, the player can reroll once or choose another piece to roll for.
+  If the piece is unable to move, or the player does not like the roll, the player can reroll once or choose another piece to roll for.
   If this also fails, the player's turn is forfeit.
     1. Pawn
     2. Bishop
     3. Knight
     4. Rook
     5. Queen
-    6. King (note: this piece only moves like a king. It does not have the properties of the "King Piece")
+    6. King (note: This piece does not have the properties of the VIP)
 
 > Attacking: Whenever a player attempts to capture a piece, flip a coin.
   - On heads, the piece is captured and placed in the attacker's hand.
   - On tails, the piece is damaged. A damaged piece automatically fails the next coin flip.
   Either player can expend a piece in their hand to re-flip the coin. There is no limit to the amount of times this can occur in a round.
   
-> Chance Time: If a king is damaged but not captured, both kings are revealed and the game enters *Chance Time*.
+> Chance Time: If a VIP is damaged but not captured, both VIPs are revealed and the game enters *Chance Time*.
   Roll 1d20 to decide what random effect is applied to the board.
   
   TO BE ADDED...
