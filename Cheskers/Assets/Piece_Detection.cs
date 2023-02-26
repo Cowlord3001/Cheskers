@@ -45,4 +45,15 @@ public static class Piece_Detection
         return BoardIndices;
     }
 
+    public static Vector2 BoardIndextoWorld(int boardPositionx, int boardPositiony)
+    {
+        Vector2 worldPosition = Vector2.zero;
+        float halfWidth = Board_Display.boardData.size / 2;
+        float halfTileSize = .5f;
+        worldPosition.x = boardPositionx - halfWidth + halfTileSize;
+        worldPosition.y = boardPositiony - halfWidth + halfTileSize;
+
+        return worldPosition;
+    }
+
 }

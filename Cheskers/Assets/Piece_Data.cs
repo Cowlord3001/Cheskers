@@ -7,11 +7,11 @@ public class  Piece_Data
     public GameObject gameObject;
     public enum Type {pawn, bishop, knight, rook, queen, king, none};
     public Type type = Type.none;
-    public bool hasMoved;
     public enum Color { white, black };
     Color color;
-    bool IsWhite;
-    bool IsKing;
+    public bool hasMoved;
+    
+    bool IsVIP;//Not Used Yet
     public bool IsDamaged;
     
     public Vector2Int positionOnBoard;
@@ -25,7 +25,7 @@ public class  Piece_Data
     {
         this.positionOnBoard = positionOnBoard;
         this.color = color;
-        IsKing = false;
+        IsVIP = false;
         IsDamaged = false;
     }
 }

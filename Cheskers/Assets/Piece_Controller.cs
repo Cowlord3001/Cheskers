@@ -19,10 +19,11 @@ public class Piece_Controller : MonoBehaviour
     enum PhaseInTurn
     {
         PIECE_SELECTION,
-        MOVE_OR_ROLL_AGAIN,
+        PIECE_CONFIRMATION, 
+        MOVE_OR_ROLL_AGAIN, //TODO: OnlyReroll Once(AfterDebugging done on movesets)
         MOVE,
-        APPLY_DAMAGE,//may be skipped if piece taken or no piece attacked
-        END_OF_TURN
+        APPLY_DAMAGE,//TODO: Add a reroll option that uses resources(dont exist yet)
+        END_OF_TURN // Piece movement should only be finalized here after options to reroll given
     }
 
     PhaseInTurn phaseInTurn;
@@ -44,6 +45,10 @@ public class Piece_Controller : MonoBehaviour
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:
                 Debug.Log("Applying PIECE_SELECTION");
+                TargetPieceToSelect();
+                //PieceSelection();
+                break;
+            case PhaseInTurn.PIECE_CONFIRMATION:
                 PieceSelection();
                 break;
             case PhaseInTurn.MOVE_OR_ROLL_AGAIN:
@@ -68,6 +73,20 @@ public class Piece_Controller : MonoBehaviour
         }
     }
 
+    void TargetPieceToSelect()
+    {
+        Piece_Data piece = Piece_Detection.GetPieceUnderMouse();
+        if(piece != null) {
+            selectedPiece = piece;
+
+            SpriteRenderer spriteRenderer = piece.gameObject.GetComponent<SpriteRenderer>();
+            spriteRenderer.color = Color.yellow;
+
+            phaseInTurn = PhaseInTurn.PIECE_CONFIRMATION;
+
+        }
+    }
+
     void MovePiece()
     {
         Vector2Int tileLocation = Piece_Detection.GetTileIndexUnderMouse();
@@ -75,10 +94,15 @@ public class Piece_Controller : MonoBehaviour
         foreach (Vector2Int moveToTile in possibleMoves) {
             if(moveToTile == tileLocation) {
 
-                boardData.MovePiece(selectedPiece, moveToTile.x, moveToTile.y);
+                //TODO: Decide between damaging and taking
+                //Need and Rerolls... 
+
+                //boardData.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
+                boardData.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
                 Board_Display.UpdatePiecesPositionsInGame();
                 
                 RemoveHighLightPossibleMoves();
+                RemoveHighlightOnSelectedPiece();
                 phaseInTurn = PhaseInTurn.END_OF_TURN;
                 break;
             }
@@ -87,24 +111,32 @@ public class Piece_Controller : MonoBehaviour
 
     void OnRollAgainPressed(object sender, EventArgs e)
     {
+
+        if(phaseInTurn == PhaseInTurn.MOVE_OR_ROLL_AGAIN) {
+            RemoveHighLightPossibleMoves();
+            RemoveHighlightOnSelectedPiece();
+
+            phaseInTurn = PhaseInTurn.PIECE_SELECTION;
+        }
+
+        /*
         Debug.Log("Roll again press in " + phaseInTurn.ToString());
         if (phaseInTurn == PhaseInTurn.MOVE_OR_ROLL_AGAIN) {
             Debug.Log(phaseInTurn.ToString());
             RemoveHighLightPossibleMoves();
-
+        
             UpdateSelectedPiece();
-
+        
             HighLightPossibleMoves();
-
+        
             phaseInTurn = PhaseInTurn.MOVE;
         }
+        */
     }
 
     void OnEndTurnPressed(object sender, EventArgs e)
     {
-        if (selectedPiece != null) {
-            RemoveHighLightPossibleMoves();
-        }
+        RemoveHighLightPossibleMoves();
         phaseInTurn = PhaseInTurn.END_OF_TURN;
     }
 
@@ -113,16 +145,31 @@ public class Piece_Controller : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) {
             Piece_Data pieceData = Piece_Detection.GetPieceUnderMouse();
             if (pieceData != null) {
-                if (selectedPiece != null) {
-                    RemoveHighLightPossibleMoves();
+
+                if (selectedPiece == pieceData) {
+
+                    selectedPiece = pieceData;
+                    UpdateSelectedPiece();
+
+                    HighLightPossibleMoves();
+                    phaseInTurn = PhaseInTurn.MOVE_OR_ROLL_AGAIN;
                 }
-
-                selectedPiece = pieceData;
-                UpdateSelectedPiece();
-
-                HighLightPossibleMoves();
-                phaseInTurn = PhaseInTurn.MOVE_OR_ROLL_AGAIN;
+                else {
+                    RemoveHighlightOnSelectedPiece();
+                    TargetPieceToSelect();
+                }
             }
+        }
+    }
+
+    void RemoveHighlightOnSelectedPiece()
+    {
+        SpriteRenderer spriteRenderer = selectedPiece.gameObject.GetComponent<SpriteRenderer>();
+        if (selectedPiece.getColor() == Piece_Data.Color.white) {
+            spriteRenderer.color = Color.red;
+        }
+        else {
+            spriteRenderer.color = Color.blue;
         }
     }
 
@@ -139,16 +186,21 @@ public class Piece_Controller : MonoBehaviour
     void HighLightPossibleMoves()
     {
         foreach (Vector2Int moveLocation in possibleMoves) {
-            SpriteRenderer sprite = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
-            sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, .1f);
+            SpriteRenderer spriteRenderer = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, .1f);
         }
     }
 
     void RemoveHighLightPossibleMoves()
     {
+        if (possibleMoves == null) {
+            Debug.LogWarning("Removing Highlighted Tiles with any moves");
+            return;
+        }
+
         foreach (Vector2Int moveLocation in possibleMoves) {
-            SpriteRenderer sprite = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
-            sprite.color = new Color(sprite.color.r, sprite.color.g, sprite.color.b, 1f);
+            SpriteRenderer spriteRenderer = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1f);
         }
     }
 

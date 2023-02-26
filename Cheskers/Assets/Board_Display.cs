@@ -47,13 +47,14 @@ public class Board_Display : MonoBehaviour
 
     }
 
+    //Updates the piece display data to game
     public static void UpdatePiecesPositionsInGame()
     {
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
                 if (boardData.boardPieces[x, y] != null) {
                     GameObject go = boardData.boardPieces[x, y].gameObject;
-                    go.transform.position = boardData.BoardIndextoWorld(x, y);
+                    go.transform.position = Piece_Detection.BoardIndextoWorld(x, y);
                 }
             }
         }

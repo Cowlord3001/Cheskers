@@ -37,6 +37,10 @@ public class Input_Controller : MonoBehaviour
 
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.R)) {
+            RollPieceAgain();
+        }
+
         mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if(Input.GetMouseButtonDown(0)) {
             float halfWidth = Board_Display.boardData.size / 2;

@@ -38,7 +38,7 @@ public class Board_Data
             {
                 if (y <= 1)
                 {
-                    boardPieces[x, y] = new Piece_Data(Piece_Data.Color.white, new Vector2Int(x, y) );
+                    boardPieces[x, y] = new Piece_Data(Piece_Data.Color.white, new Vector2Int(x, y));
                 }
                 else if (y >= size - 2)
                 {
@@ -47,11 +47,6 @@ public class Board_Data
                 else boardPieces[x,y] = null;
             }
         }
-    }
-
-    public Piece_Data GetPiece(int x, int y)
-    {
-        return boardPieces[x,y];
     }
 
     public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
@@ -66,7 +61,6 @@ public class Board_Data
                     legalMoves.Add(move);
                 }
             }
-
         }
 
         //Handle Preset Moves
@@ -79,38 +73,38 @@ public class Board_Data
 
 
             //Pawn Logic! They can only move in one direction so skip move if its
-            //The wrong direction.
+            //The wrong direction. Can't move backwards
             if (chessMoves.pieceType == Piece_Data.Type.pawn) {
-                if(piece.getColor() == Piece_Data.Color.white && move.changeInY < 0) {
+                if (piece.getColor() == Piece_Data.Color.white && move.changeInY < 0) {
                     continue;
                 }
-                else if(piece.getColor() == Piece_Data.Color.black && move.changeInY > 0) {
+                else if (piece.getColor() == Piece_Data.Color.black && move.changeInY > 0) {
                     continue;
+                }
+                //Only Pawns need this extra check but some checkers rules need this too???
+                if (move.requiresTargetPiece == false) {
+                    if (moveValidateResult == MOVING_TO_EMPTY) {
+                        legalMoves.Add(new Vector2Int(newXPos, newYPos));
+                    }
+                }
+                else {
+                    if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
+                        legalMoves.Add(new Vector2Int(newXPos, newYPos));
+                    }
                 }
             }
-
-            //Only Pawns need this extra check but some checkers rules need this too???
-            if (move.requiresTargetPiece == false) {
+            else {
+                //Not a pawn
                 if (moveValidateResult != MOVING_TO_ILLIGAL_SPACE) {
                     legalMoves.Add(new Vector2Int(newXPos, newYPos));
                 }
             }
-            else {
-                if(moveValidateResult  == MOVING_TO_ENEMYPIECE) {
-
-                    legalMoves.Add(new Vector2Int(newXPos, newYPos));
-                }
-            }
-
-            
-
 
         }
-        int i = 0;
+
         //Sliding Move
         foreach(SlidingMove move in chessMoves.slidingMoves) {
-            int moveValidateResult = -1;
-            i++;
+            int moveValidateResult;
             int x = piece.positionOnBoard.x;
             int endX = piece.positionOnBoard.x + move.changeInX;
             int y = piece.positionOnBoard.y;
@@ -160,18 +154,61 @@ public class Board_Data
                 newYpos = piece.positionOnBoard.y - 2;
             }
 
-            int moveValidateResult = ValidMove(piece.getColor(), newXpos, newYpos);
+            int moveValidateResult1 = ValidMove(piece.getColor(), newXpos, newYpos);
+            int moveValidateResult2 = ValidMove(piece.getColor(), newXpos, newYpos - 1);
 
-            if(moveValidateResult == MOVING_TO_EMPTY) {
+            if (moveValidateResult1 == MOVING_TO_EMPTY && moveValidateResult2 == MOVING_TO_EMPTY) {
                 ExtraMoves.Add(new Vector2Int(newXpos, newYpos));
             }
         }
 
+        //TODO: Detect en pessant
 
         return ExtraMoves;
     }
 
-    public bool MovePiece(Piece_Data piece, int newXPos, int newYPos)
+    public bool MoveAndDamage(Piece_Data piece, int newXPos, int newYPos)
+    {
+        if(piece.type == Piece_Data.Type.knight ||
+           piece.type == Piece_Data.Type.pawn   ||
+           piece.type == Piece_Data.Type.king) {
+           Damage(newXPos, newYPos);
+        }
+        else {
+            //Calculate where to land.
+            int deltaX = newXPos - piece.positionOnBoard.x;
+            int deltaY = newYPos - piece.positionOnBoard.y;
+
+            if(deltaX != 0)
+                deltaX = deltaX / Mathf.Abs(deltaX);
+            if(deltaY != 0)
+                deltaY = deltaY / Mathf.Abs(deltaY);
+
+            Move(piece, newXPos - deltaX, newYPos - deltaY);
+
+            Damage(newXPos, newYPos);
+
+        }
+
+
+        return true;
+    }
+
+    void Damage(int pieceToDamagePositionX, int pieceToDamagePositionY)
+    {
+        boardPieces[pieceToDamagePositionX, pieceToDamagePositionY].IsDamaged = true;
+        PieceDamageEventArgs e = new PieceDamageEventArgs();
+        e.damagedPiece = boardPieces[pieceToDamagePositionX, pieceToDamagePositionY];
+        OnPieceDamaged(this, e);
+    }
+
+    void Move(Piece_Data piece, int newXPos, int newYPos)
+    {
+        boardPieces[newXPos, newYPos] = piece;
+        boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
+        piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
+    }
+    public bool MoveAndTake(Piece_Data piece, int newXPos, int newYPos)
     {
 
         int moveValidateResult = ValidMove(piece.getColor(), newXPos, newYPos);
@@ -187,43 +224,14 @@ public class Board_Data
             if(boardPieces[newXPos, newYPos].IsDamaged == true) {
                 RemovePiece(piece, newXPos, newYPos);
             }
-            else {
-                //Roll to see if piece is damage or removed
-                int coinFlip = UnityEngine.Random.Range(0, 2);
-                if(coinFlip == 0) {
-                    RemovePiece(piece, newXPos, newYPos);
-                }
-                else {
-                    //Damage Piece and ?Don't move?
-                    boardPieces[newXPos, newYPos].IsDamaged = true;
-                    
-                    //Fire the piece damaged event
-                    PieceDamageEventArgs e = new PieceDamageEventArgs();
-                    e.damagedPiece = boardPieces[newXPos, newYPos];
-                    OnPieceDamaged?.Invoke(this, e);
-                }
-            }
         }
 
         //Moving to EmptySpace
         if(moveValidateResult == MOVING_TO_EMPTY) {
-            boardPieces[newXPos, newYPos] = piece;
-            boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
-            piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
+            Move(piece, newXPos, newYPos);
         }
 
         return true;
-    }
-
-    public Vector2 BoardIndextoWorld(int boardPositionx, int boardPositiony)
-    {
-        Vector2 worldPosition = Vector2.zero;
-        float halfWidth = size / 2;
-        float halfTileSize = .5f;
-        worldPosition.x = boardPositionx - halfWidth + halfTileSize;
-        worldPosition.y = boardPositiony - halfWidth + halfTileSize;
-
-        return worldPosition;
     }
 
     private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
@@ -233,10 +241,9 @@ public class Board_Data
         e.removedPiece = boardPieces[removeX, removeY];
         OnPieceRemovedFromBoard?.Invoke(this, e);
 
-        //Actually remove the piece
-        boardPieces[removeX, removeY] = pieceThatisTaking;
-        boardPieces[pieceThatisTaking.positionOnBoard.x, pieceThatisTaking.positionOnBoard.y] = null;
-        pieceThatisTaking.positionOnBoard = new Vector2Int(removeX, removeY);
+        //Actually remove the piece 
+        //TODO: Put into a function
+        Move(pieceThatisTaking, removeX, removeY);
 
     }
 
