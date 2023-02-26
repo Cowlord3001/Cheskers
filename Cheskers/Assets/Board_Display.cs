@@ -8,16 +8,24 @@ public class Board_Display : MonoBehaviour
 {
     [SerializeField] GameObject blackTile;
     [SerializeField] GameObject whiteTile;
-    public static Board_Data boardData { get; private set; }
-    public static GameObject[,] boardTiles { get; private set; }
+
+    public static Board_Display Instance;
+
+    public Board_Data boardData { get; private set; }
+    public GameObject[,] boardTiles { get; private set; }
 
     [SerializeField] GameObject whitePiece;
     [SerializeField] GameObject blackPiece;
+    [SerializeField] Sprite blackSprite;
+    [SerializeField] Sprite whiteSprite;
+    [SerializeField] Sprite blackDamagedSprite;
+    [SerializeField] Sprite whiteDamagedSprite;
 
 
     // Start is called before the first frame update
     void Awake()
     {
+        Instance = this;
         CreateBoard_Data();
         CreateBoard();
 
@@ -32,7 +40,7 @@ public class Board_Display : MonoBehaviour
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
                 if (boardData.boardPieces[x,y] != null) {
-                    if (boardData.boardPieces[x, y].getColor() == Piece_Data.Color.white) {
+                    if (boardData.boardPieces[x, y].GetColor() == Piece_Data.Color.white) {
                         boardData.boardPieces[x, y].gameObject = Instantiate(whitePiece, transform.position, Quaternion.identity);
                     }
                     else {
@@ -43,23 +51,36 @@ public class Board_Display : MonoBehaviour
             }
         }
 
-        UpdatePiecesPositionsInGame();
+        UpdatePieces();
 
     }
 
     //Updates the piece display data to game
-    public static void UpdatePiecesPositionsInGame()
+    public void UpdatePieces()
     {
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {
                 if (boardData.boardPieces[x, y] != null) {
                     GameObject go = boardData.boardPieces[x, y].gameObject;
                     go.transform.position = Piece_Detection.BoardIndextoWorld(x, y);
+                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(boardData.boardPieces[x, y].GetColor(), boardData.boardPieces[x, y].IsDamaged);
                 }
             }
         }
     }
-    
+    Sprite GetDefaultSprite(Piece_Data.Color color, bool isDamaged)
+    {
+        switch (color) {
+            case Piece_Data.Color.white:
+                if (isDamaged) return whiteDamagedSprite;
+                else return whiteSprite;
+            case Piece_Data.Color.black:
+                if (isDamaged) return blackDamagedSprite;
+                else return blackSprite;
+            default:
+                return null;
+        }
+    }
 
     void CreateBoard()
     {

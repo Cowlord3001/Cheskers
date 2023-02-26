@@ -7,6 +7,8 @@ using static Board_Data;
 public class Piece_Controller : MonoBehaviour
 {
     [SerializeField] Chess_Move_SO[] chessMoves;
+    [SerializeField] GameObject highLightGraphicPrefab;
+    GameObject highLightGraphic;
 
     Board_Data boardData;
     Piece_Data selectedPiece;
@@ -31,12 +33,13 @@ public class Piece_Controller : MonoBehaviour
     void Start()
     {
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
-        boardData = Board_Display.boardData;
+        boardData = Board_Display.Instance.boardData;
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
         //SHOULD BE ON ANOTHER SCRIPT MAYBE A DISCARD AREA IN THE FUTURE
         boardData.OnPieceRemovedFromBoard += OnPieceRemoved;
+        boardData.OnPieceDamaged += OnPieceDamaged;
 
     }
 
@@ -79,8 +82,7 @@ public class Piece_Controller : MonoBehaviour
         if(piece != null) {
             selectedPiece = piece;
 
-            SpriteRenderer spriteRenderer = piece.gameObject.GetComponent<SpriteRenderer>();
-            spriteRenderer.color = Color.yellow;
+            HighLightSelectecPiece();
 
             phaseInTurn = PhaseInTurn.PIECE_CONFIRMATION;
 
@@ -94,12 +96,14 @@ public class Piece_Controller : MonoBehaviour
         foreach (Vector2Int moveToTile in possibleMoves) {
             if(moveToTile == tileLocation) {
 
+                Debug.Log("Attempting to Move");
                 //TODO: Decide between damaging and taking
                 //Need and Rerolls... 
 
                 //boardData.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
                 boardData.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
-                Board_Display.UpdatePiecesPositionsInGame();
+                Debug.Log(Board_Data.debugMessage);
+                Board_Display.Instance.UpdatePieces();
                 
                 RemoveHighLightPossibleMoves();
                 RemoveHighlightOnSelectedPiece();
@@ -145,6 +149,7 @@ public class Piece_Controller : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) {
             Piece_Data pieceData = Piece_Detection.GetPieceUnderMouse();
             if (pieceData != null) {
+                RemoveHighlightOnSelectedPiece();
 
                 if (selectedPiece == pieceData) {
 
@@ -155,21 +160,26 @@ public class Piece_Controller : MonoBehaviour
                     phaseInTurn = PhaseInTurn.MOVE_OR_ROLL_AGAIN;
                 }
                 else {
-                    RemoveHighlightOnSelectedPiece();
                     TargetPieceToSelect();
                 }
             }
         }
     }
 
+    void HighLightSelectecPiece()
+    {
+        if (highLightGraphic == null) {
+            highLightGraphic = Instantiate(highLightGraphicPrefab, 
+                                           selectedPiece.gameObject.transform.position, 
+                                           Quaternion.identity);
+
+        }
+    }
+
     void RemoveHighlightOnSelectedPiece()
     {
-        SpriteRenderer spriteRenderer = selectedPiece.gameObject.GetComponent<SpriteRenderer>();
-        if (selectedPiece.getColor() == Piece_Data.Color.white) {
-            spriteRenderer.color = Color.red;
-        }
-        else {
-            spriteRenderer.color = Color.blue;
+        if (highLightGraphic != null) {
+            Destroy(highLightGraphic);
         }
     }
 
@@ -181,12 +191,12 @@ public class Piece_Controller : MonoBehaviour
 
         selectedPiece.type = chessMoves[randomMove].pieceType;
         selectedPiece.gameObject.GetComponent<SpriteRenderer>().sprite =
-                chessMoves[randomMove].GetSprite(selectedPiece.getColor(), selectedPiece.IsDamaged);
+                chessMoves[randomMove].GetSprite(selectedPiece.GetColor(), selectedPiece.IsDamaged);
     }
     void HighLightPossibleMoves()
     {
         foreach (Vector2Int moveLocation in possibleMoves) {
-            SpriteRenderer spriteRenderer = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            SpriteRenderer spriteRenderer = Board_Display.Instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, .1f);
         }
     }
@@ -199,7 +209,7 @@ public class Piece_Controller : MonoBehaviour
         }
 
         foreach (Vector2Int moveLocation in possibleMoves) {
-            SpriteRenderer spriteRenderer = Board_Display.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            SpriteRenderer spriteRenderer = Board_Display.Instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1f);
         }
     }
@@ -208,5 +218,10 @@ public class Piece_Controller : MonoBehaviour
     void OnPieceRemoved(object sender, PieceRemovedEventArgs e)
     {
         Destroy(e.removedPiece.gameObject);
+    }
+    
+    void OnPieceDamaged(object sender, PieceDamageEventArgs e)
+    {
+        Board_Display.Instance.UpdatePieces();
     }
 }

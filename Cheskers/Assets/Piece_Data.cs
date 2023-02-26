@@ -16,7 +16,7 @@ public class  Piece_Data
     
     public Vector2Int positionOnBoard;
 
-    public Color getColor()
+    public Color GetColor()
     {
         return color;
     }

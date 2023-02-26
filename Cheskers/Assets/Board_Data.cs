@@ -69,16 +69,16 @@ public class Board_Data
             int newYPos = piece.positionOnBoard.y + move.changeInY;
 
 
-            int moveValidateResult = ValidMove(piece.getColor(), newXPos, newYPos);
+            int moveValidateResult = ValidMove(piece.GetColor(), newXPos, newYPos);
 
 
             //Pawn Logic! They can only move in one direction so skip move if its
             //The wrong direction. Can't move backwards
             if (chessMoves.pieceType == Piece_Data.Type.pawn) {
-                if (piece.getColor() == Piece_Data.Color.white && move.changeInY < 0) {
+                if (piece.GetColor() == Piece_Data.Color.white && move.changeInY < 0) {
                     continue;
                 }
-                else if (piece.getColor() == Piece_Data.Color.black && move.changeInY > 0) {
+                else if (piece.GetColor() == Piece_Data.Color.black && move.changeInY > 0) {
                     continue;
                 }
                 //Only Pawns need this extra check but some checkers rules need this too???
@@ -119,7 +119,7 @@ public class Board_Data
                     y += move.changeInY/Mathf.Abs(move.changeInY);
 
                 //Validate position
-                moveValidateResult = ValidMove(piece.getColor(), x, y);
+                moveValidateResult = ValidMove(piece.GetColor(), x, y);
 
                 //If move is not illegal
                 if (moveValidateResult == MOVING_TO_EMPTY) {
@@ -147,15 +147,15 @@ public class Board_Data
         if(piece.hasMoved == false) {
             int newXpos = piece.positionOnBoard.x;
             int newYpos;
-            if (piece.getColor() == Piece_Data.Color.white) {
+            if (piece.GetColor() == Piece_Data.Color.white) {
                 newYpos = piece.positionOnBoard.y + 2;
             }
             else {
                 newYpos = piece.positionOnBoard.y - 2;
             }
 
-            int moveValidateResult1 = ValidMove(piece.getColor(), newXpos, newYpos);
-            int moveValidateResult2 = ValidMove(piece.getColor(), newXpos, newYpos - 1);
+            int moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
+            int moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos - 1);
 
             if (moveValidateResult1 == MOVING_TO_EMPTY && moveValidateResult2 == MOVING_TO_EMPTY) {
                 ExtraMoves.Add(new Vector2Int(newXpos, newYpos));
@@ -204,6 +204,7 @@ public class Board_Data
 
     void Move(Piece_Data piece, int newXPos, int newYPos)
     {
+        debugMessage += "Attempted To Move to : " + newXPos + ", " + newYPos;
         boardPieces[newXPos, newYPos] = piece;
         boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
         piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
@@ -211,8 +212,8 @@ public class Board_Data
     public bool MoveAndTake(Piece_Data piece, int newXPos, int newYPos)
     {
 
-        int moveValidateResult = ValidMove(piece.getColor(), newXPos, newYPos);
-
+        int moveValidateResult = ValidMove(piece.GetColor(), newXPos, newYPos);
+        debugMessage += "Movement Result: " + moveValidateResult;
         //If move is illigal return false for failed move shouldnt happen
         if (moveValidateResult == MOVING_TO_ILLIGAL_SPACE) return false;
         //Moving to enemy piece it should be damaged or removed
@@ -220,10 +221,8 @@ public class Board_Data
         piece.hasMoved = true;
 
         if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
-
-            if(boardPieces[newXPos, newYPos].IsDamaged == true) {
-                RemovePiece(piece, newXPos, newYPos);
-            }
+            RemovePiece(piece, newXPos, newYPos);
+            Move(piece, newXPos, newYPos);
         }
 
         //Moving to EmptySpace
@@ -236,14 +235,12 @@ public class Board_Data
 
     private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
     {
+        debugMessage += "Attempted To Remove at : " + removeX + ", " + removeY;
         //Fire Remove Piece Event
         PieceRemovedEventArgs e = new PieceRemovedEventArgs();
         e.removedPiece = boardPieces[removeX, removeY];
         OnPieceRemovedFromBoard?.Invoke(this, e);
 
-        //Actually remove the piece 
-        //TODO: Put into a function
-        Move(pieceThatisTaking, removeX, removeY);
 
     }
 
@@ -255,7 +252,7 @@ public class Board_Data
         if (boardPieces[newXPos, newYPos] == null) {
             return MOVING_TO_EMPTY;
         }
-        else if(boardPieces[newXPos, newYPos].getColor() != color) {
+        else if(boardPieces[newXPos, newYPos].GetColor() != color) {
             return MOVING_TO_ENEMYPIECE;
         }
         else {
