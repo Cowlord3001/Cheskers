@@ -47,7 +47,7 @@ public class Board_Setup : MonoBehaviour
 
     }
 
-    void UpdatePiecesPositions()
+    public static void UpdatePiecesPositions()
     {
         for (int x = 0; x < boardData.size; x++) {
             for (int y = 0; y < boardData.size; y++) {

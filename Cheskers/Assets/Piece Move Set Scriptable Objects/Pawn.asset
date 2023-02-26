@@ -23,3 +23,13 @@ MonoBehaviour:
   - requiresTargetPiece: 0
     changeInX: 0
     changeInY: 1
+  - requiresTargetPiece: 1
+    changeInX: 1
+    changeInY: -1
+  - requiresTargetPiece: 1
+    changeInX: -1
+    changeInY: -1
+  - requiresTargetPiece: 0
+    changeInX: 0
+    changeInY: -1
+  slidingMoves: []

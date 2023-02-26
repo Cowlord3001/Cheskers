@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "ChessMoveSet")]
 public class Chess_Move_SO : ScriptableObject
 {
-    public Piece_Data.State chessPiece;
+    public Piece_Data.Type chessPiece;
 
     public Move[] moves;
     public SlidingMove[] slidingMoves;

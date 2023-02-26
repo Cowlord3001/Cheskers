@@ -25,7 +25,7 @@ MonoBehaviour:
     changeInY: 1
   - requiresTargetPiece: 0
     changeInX: -2
-    changeInY: 1
+    changeInY: -1
   - requiresTargetPiece: 0
     changeInX: 1
     changeInY: 2
@@ -38,3 +38,4 @@ MonoBehaviour:
   - requiresTargetPiece: 0
     changeInX: -1
     changeInY: -2
+  slidingMoves: []
