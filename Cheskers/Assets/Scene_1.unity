@@ -623,6 +623,7 @@ MonoBehaviour:
   mouseWorldPosition: {x: 0, y: 0, z: 0}
   developerCommandsEnabled: 1
   endTurn: {fileID: 778547110}
+  rerollPieceButton: {fileID: 655719042}
   whiteButtonHolder: {fileID: 1413341652}
   whiteRerollButton: {fileID: 6394819514952921870, guid: d6edd623a5626d24c8fd2c9bf084fcc3, type: 3}
   blackButtonHolder: {fileID: 1399582709}
@@ -654,7 +655,7 @@ GameObject:
   - component: {fileID: 1333526509}
   - component: {fileID: 1333526508}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: TokenHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -801,7 +802,7 @@ GameObject:
   - component: {fileID: 1399582711}
   - component: {fileID: 1399582713}
   m_Layer: 5
-  m_Name: BlackReRolls
+  m_Name: BlackTokenHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -902,7 +903,7 @@ GameObject:
   - component: {fileID: 1413341654}
   - component: {fileID: 1413341656}
   m_Layer: 5
-  m_Name: WhiteReRolls
+  m_Name: WhiteTokenHolders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

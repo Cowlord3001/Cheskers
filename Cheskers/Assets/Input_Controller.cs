@@ -16,6 +16,7 @@ public class Input_Controller : MonoBehaviour
     public event EventHandler OnEndTurnButtonClicked;
 
     [SerializeField] Button endTurn;
+    [SerializeField] Button rerollPieceButton;
 
     [Header("ReRollButtonSettings")]
     [SerializeField] GameObject whiteButtonHolder;
@@ -27,7 +28,7 @@ public class Input_Controller : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        //rollPieceAgain.onClick.AddListener(() => RollPieceAgain());
+        rerollPieceButton.onClick.AddListener(() => RollPieceAgain());
         endTurn.onClick.AddListener(() => EndTurn());
     }
 
@@ -40,23 +41,29 @@ public class Input_Controller : MonoBehaviour
     {
         if(e.removedPiece.GetColor() == Piece_Data.Color.black) {
             GameObject go = Instantiate(whiteRerollButton, whiteButtonHolder.transform);
-            go.GetComponent<Button>().onClick.AddListener(() => RollPieceAgain());
+            go.GetComponent<Button>().onClick.AddListener(() => ReRollDamage());
         }
         else {
             GameObject go = Instantiate(blackRerollButton, blackButtonHolder.transform);
-            go.GetComponent<Button>().onClick.AddListener(() => RollPieceAgain());
+            go.GetComponent<Button>().onClick.AddListener(() => ReRollDamage());
         }
     }
 
+
     void RollPieceAgain()
+    {
+        OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    void ReRollDamage()
     {
         //TODO: Need check for if player is white or black.
         if (Piece_Controller.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
-            OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
+            //OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
             Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
         }
         else if (Piece_Controller.color == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
-            OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
+            //OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
             Destroy(blackButtonHolder.transform.GetChild(0).gameObject);
         }
     }

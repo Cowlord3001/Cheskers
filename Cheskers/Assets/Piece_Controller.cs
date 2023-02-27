@@ -98,8 +98,8 @@ public class Piece_Controller : MonoBehaviour
                 //TODO: Decide between damaging and taking
                 //Need and Rerolls... 
 
-                //boardData.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
-                Board_Data.instance.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
+                Board_Data.instance.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
+                //Board_Data.instance.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
                 //Debug.Log(Board_Data.debugMessage);
                 Board_Display.Instance.UpdatePieces();
                 
