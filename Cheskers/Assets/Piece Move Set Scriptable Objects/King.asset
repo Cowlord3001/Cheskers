@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: King
   m_EditorClassIdentifier: 
   pieceType: 5
-  spriteBlackNoDamage: {fileID: 21300000, guid: c2877d5a536d24f4384955ba969295c9, type: 3}
+  spriteBlackNoDamage: {fileID: 21300000, guid: bb47b33ea54e7a646b820bb7e02a79e7, type: 3}
   spriteBlackDamaged: {fileID: 21300000, guid: 42cf8090680e11247875a2c6712a3370, type: 3}
   spriteWhiteNoDamage: {fileID: 21300000, guid: 5d9ae2dd2834b244b8c0863ef80a0cc3, type: 3}
   spriteWhiteDamaged: {fileID: 21300000, guid: 54b6fa12446ec4546bf2b00ae7a56ead, type: 3}

@@ -6,7 +6,10 @@ using UnityEngine.tvOS;
 
 public class Board_Data
 {
-    public static string debugMessage;
+    //Singleton
+    public static Board_Data instance;
+
+    //public static string debugMessage;
     public Piece_Data[,] boardPieces { get; private set; }
     public int size { get; private set; }
 
@@ -29,7 +32,7 @@ public class Board_Data
 
     public Board_Data()
     {
-        debugMessage = "";
+        //debugMessage = "";
         size = 8;
         boardPieces = new Piece_Data[size, size];
         for (int y = 0; y < size; y++)
@@ -204,7 +207,6 @@ public class Board_Data
 
     void Move(Piece_Data piece, int newXPos, int newYPos)
     {
-        debugMessage += "Attempted To Move to : " + newXPos + ", " + newYPos;
         boardPieces[newXPos, newYPos] = piece;
         boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
         piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
@@ -213,7 +215,6 @@ public class Board_Data
     {
 
         int moveValidateResult = ValidMove(piece.GetColor(), newXPos, newYPos);
-        debugMessage += "Movement Result: " + moveValidateResult;
         //If move is illigal return false for failed move shouldnt happen
         if (moveValidateResult == MOVING_TO_ILLIGAL_SPACE) return false;
         //Moving to enemy piece it should be damaged or removed
@@ -235,7 +236,6 @@ public class Board_Data
 
     private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
     {
-        debugMessage += "Attempted To Remove at : " + removeX + ", " + removeY;
         //Fire Remove Piece Event
         PieceRemovedEventArgs e = new PieceRemovedEventArgs();
         e.removedPiece = boardPieces[removeX, removeY];

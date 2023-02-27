@@ -10,13 +10,12 @@ public class Piece_Controller : MonoBehaviour
     [SerializeField] GameObject highLightGraphicPrefab;
     GameObject highLightGraphic;
 
-    Board_Data boardData;
     Piece_Data selectedPiece;
 
     List<Vector2Int> possibleMoves;
 
     bool isYourTurn;
-    Piece_Data.Color color = Piece_Data.Color.white;
+    public static Piece_Data.Color color = Piece_Data.Color.white;
 
     enum PhaseInTurn
     {
@@ -33,13 +32,12 @@ public class Piece_Controller : MonoBehaviour
     void Start()
     {
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
-        boardData = Board_Display.Instance.boardData;
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
         //SHOULD BE ON ANOTHER SCRIPT MAYBE A DISCARD AREA IN THE FUTURE
-        boardData.OnPieceRemovedFromBoard += OnPieceRemoved;
-        boardData.OnPieceDamaged += OnPieceDamaged;
+        Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemoved;
+        Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
 
     }
 
@@ -101,8 +99,8 @@ public class Piece_Controller : MonoBehaviour
                 //Need and Rerolls... 
 
                 //boardData.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
-                boardData.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
-                Debug.Log(Board_Data.debugMessage);
+                Board_Data.instance.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
+                //Debug.Log(Board_Data.debugMessage);
                 Board_Display.Instance.UpdatePieces();
                 
                 RemoveHighLightPossibleMoves();
@@ -187,7 +185,7 @@ public class Piece_Controller : MonoBehaviour
     {
         int randomMove = UnityEngine.Random.Range(0, chessMoves.Length);
 
-        possibleMoves = boardData.getAllLegalMoves(selectedPiece, chessMoves[randomMove]);
+        possibleMoves = Board_Data.instance.getAllLegalMoves(selectedPiece, chessMoves[randomMove]);
 
         selectedPiece.type = chessMoves[randomMove].pieceType;
         selectedPiece.gameObject.GetComponent<SpriteRenderer>().sprite =

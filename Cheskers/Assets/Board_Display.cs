@@ -11,7 +11,6 @@ public class Board_Display : MonoBehaviour
 
     public static Board_Display Instance;
 
-    public Board_Data boardData { get; private set; }
     public GameObject[,] boardTiles { get; private set; }
 
     [SerializeField] GameObject whitePiece;
@@ -34,19 +33,19 @@ public class Board_Display : MonoBehaviour
     void CreateBoard_Data()
     {
         //Creates Board and Piece
-        boardData = new Board_Data();
+        Board_Data.instance = new Board_Data();
 
         //Fill with white or black pieces
-        for (int x = 0; x < boardData.size; x++) {
-            for (int y = 0; y < boardData.size; y++) {
-                if (boardData.boardPieces[x,y] != null) {
-                    if (boardData.boardPieces[x, y].GetColor() == Piece_Data.Color.white) {
-                        boardData.boardPieces[x, y].gameObject = Instantiate(whitePiece, transform.position, Quaternion.identity);
+        for (int x = 0; x < Board_Data.instance.size; x++) {
+            for (int y = 0; y < Board_Data.instance.size; y++) {
+                if (Board_Data.instance.boardPieces[x,y] != null) {
+                    if (Board_Data.instance.boardPieces[x, y].GetColor() == Piece_Data.Color.white) {
+                        Board_Data.instance.boardPieces[x, y].gameObject = Instantiate(whitePiece, transform.position, Quaternion.identity);
                     }
                     else {
-                        boardData.boardPieces[x, y].gameObject = Instantiate(blackPiece, transform.position, Quaternion.identity);
+                        Board_Data.instance.boardPieces[x, y].gameObject = Instantiate(blackPiece, transform.position, Quaternion.identity);
                     }
-                    boardData.boardPieces[x, y].gameObject.transform.parent = transform;
+                    Board_Data.instance.boardPieces[x, y].gameObject.transform.parent = transform;
                 }
             }
         }
@@ -58,12 +57,12 @@ public class Board_Display : MonoBehaviour
     //Updates the piece display data to game
     public void UpdatePieces()
     {
-        for (int x = 0; x < boardData.size; x++) {
-            for (int y = 0; y < boardData.size; y++) {
-                if (boardData.boardPieces[x, y] != null) {
-                    GameObject go = boardData.boardPieces[x, y].gameObject;
+        for (int x = 0; x < Board_Data.instance.size; x++) {
+            for (int y = 0; y < Board_Data.instance.size; y++) {
+                if (Board_Data.instance.boardPieces[x, y] != null) {
+                    GameObject go = Board_Data.instance.boardPieces[x, y].gameObject;
                     go.transform.position = Piece_Detection.BoardIndextoWorld(x, y);
-                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(boardData.boardPieces[x, y].GetColor(), boardData.boardPieces[x, y].IsDamaged);
+                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(Board_Data.instance.boardPieces[x, y].GetColor(), Board_Data.instance.boardPieces[x, y].IsDamaged);
                 }
             }
         }
@@ -85,12 +84,12 @@ public class Board_Display : MonoBehaviour
     void CreateBoard()
     {
 
-        boardTiles = new GameObject[boardData.size, boardData.size];
-        float halfWidth = boardData.size / 2;
+        boardTiles = new GameObject[Board_Data.instance.size, Board_Data.instance.size];
+        float halfWidth = Board_Data.instance.size / 2;
         float tileWidth = .5f;
         bool isWhite = true;
-        for (int y = 0; y < boardData.size; y++) {
-            for (int x = 0; x < boardData.size; x++) {
+        for (int y = 0; y < Board_Data.instance.size; y++) {
+            for (int x = 0; x < Board_Data.instance.size; x++) {
                 if(isWhite == true) {
                     isWhite = false;
                     GameObject go = Instantiate(whiteTile);
