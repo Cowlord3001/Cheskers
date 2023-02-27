@@ -33,7 +33,7 @@ public static class Piece_Detection
 
     }
 
-    static Vector2Int WorldtoBoardIndex(float x, float y)
+    public static Vector2Int WorldtoBoardIndex(float x, float y)
     {
         Vector2Int BoardIndices = Vector2Int.zero;
         float halfWidth = Board_Data.instance.size / 2;

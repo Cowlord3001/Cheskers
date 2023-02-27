@@ -186,8 +186,14 @@ public class Board_Data
                 deltaX = deltaX / Mathf.Abs(deltaX);
             if(deltaY != 0)
                 deltaY = deltaY / Mathf.Abs(deltaY);
+            if(newXPos - deltaX == piece.positionOnBoard.x && newYPos - deltaY == piece.positionOnBoard.y)
+            {
 
-            Move(piece, newXPos - deltaX, newYPos - deltaY);
+            }
+            else
+            {
+                Move(piece, newXPos - deltaX, newYPos - deltaY);
+            }
 
             Damage(newXPos, newYPos);
 

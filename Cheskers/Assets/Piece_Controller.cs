@@ -17,13 +17,20 @@ public class Piece_Controller : MonoBehaviour
     bool isYourTurn;
     public static Piece_Data.Color color = Piece_Data.Color.white;
 
+    Vector2Int decidedMove;
+    bool rerolled = false;
+    int coinFlip;
+
+    const int CAPTURE = 0;
+    const int DAMAGE = 1;
+
     enum PhaseInTurn
     {
         PIECE_SELECTION,
-        PIECE_CONFIRMATION, 
-        MOVE_OR_ROLL_AGAIN, //TODO: OnlyReroll Once(AfterDebugging done on movesets)
-        MOVE,
-        APPLY_DAMAGE,//TODO: Add a reroll option that uses resources(dont exist yet)
+        PIECE_CONFIRMATION,
+        DECIDE_MOVE_OR_REROLL,//TODO: OnlyReroll Once(AfterDebugging done on movesets)
+        CONTEST,//TODO: Add a reroll option that uses resources(dont exist yet)
+        MOVE_AND_UPDATE,
         END_OF_TURN // Piece movement should only be finalized here after options to reroll given
     }
 
@@ -35,38 +42,38 @@ public class Piece_Controller : MonoBehaviour
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
+        Input_Controller.instance.OnContestButtonClicked += OnContestPressed;
+        Input_Controller.instance.OnDeclineButtonClicked += OnDeclinePressed;
         //SHOULD BE ON ANOTHER SCRIPT MAYBE A DISCARD AREA IN THE FUTURE
         Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemoved;
         Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
-
     }
 
     void OnLeftMouseClick(object sender, EventArgs e)
     {
         switch (phaseInTurn) {
-            case PhaseInTurn.PIECE_SELECTION:
+            case PhaseInTurn.PIECE_SELECTION:                   // DONE
                 Debug.Log("Applying PIECE_SELECTION");
                 TargetPieceToSelect();
-                //PieceSelection();
                 break;
-            case PhaseInTurn.PIECE_CONFIRMATION:
+            case PhaseInTurn.PIECE_CONFIRMATION:                // DONE
+                Debug.Log("Applying PIECE_CONFIRMATION");
                 PieceSelection();
                 break;
-            case PhaseInTurn.MOVE_OR_ROLL_AGAIN:
-                Debug.Log("Applying MOVE_OR_ROLL_AGAIN");
-                MovePiece();
+            case PhaseInTurn.DECIDE_MOVE_OR_REROLL:
+                Debug.Log("Applying DECIDE_MOVE_OR_REROLL");    // DONE
+                DecideMove();
                 break;
-            case PhaseInTurn.MOVE:
-                Debug.Log("Applying MOVE");
-                MovePiece();
+            case PhaseInTurn.CONTEST:
+                Debug.Log("Applying CONTEST");                  // DONE
                 break;
-            case PhaseInTurn.APPLY_DAMAGE:
-                Debug.Log("Applying APPLY_DAMAGE");
-                //MaybeNotNeed probably for playing animation or something
+            case PhaseInTurn.MOVE_AND_UPDATE:
+                Debug.Log("Applying MOVE_AND_UPDATE");          // DONE
                 break;
             case PhaseInTurn.END_OF_TURN:
                 Debug.Log("Applying END_OF_TURN");
                 //For Testing turn back to start of turn
+                rerolled = false;
                 phaseInTurn = PhaseInTurn.PIECE_SELECTION;
                 break;
             default:
@@ -80,65 +87,107 @@ public class Piece_Controller : MonoBehaviour
         if(piece != null) {
             selectedPiece = piece;
 
-            HighLightSelectecPiece();
+            //Debug.Log(selectedPiece.gameObject.name);
+            HighLightSelectedPiece();
 
             phaseInTurn = PhaseInTurn.PIECE_CONFIRMATION;
-
         }
     }
 
-    void MovePiece()
+    void DecideMove()
     {
-        Vector2Int tileLocation = Piece_Detection.GetTileIndexUnderMouse();
-        
-        foreach (Vector2Int moveToTile in possibleMoves) {
-            if(moveToTile == tileLocation) {
-
-                Debug.Log("Attempting to Move");
-                //TODO: Decide between damaging and taking
-                //Need and Rerolls... 
-
-                Board_Data.instance.MoveAndDamage(selectedPiece, moveToTile.x, moveToTile.y);
-                //Board_Data.instance.MoveAndTake(selectedPiece, moveToTile.x, moveToTile.y);
-                //Debug.Log(Board_Data.debugMessage);
-                Board_Display.Instance.UpdatePieces();
-                
-                RemoveHighLightPossibleMoves();
-                RemoveHighlightOnSelectedPiece();
-                phaseInTurn = PhaseInTurn.END_OF_TURN;
-                break;
+        decidedMove = Input_Controller.instance.mouseBoardPosition;
+        foreach (var move in possibleMoves)
+        {
+            if(decidedMove == move)
+            {
+                phaseInTurn = PhaseInTurn.CONTEST;
+                Contest();
             }
         }
+    }
+
+    void Contest()
+    {
+        if (Board_Data.instance.boardPieces[decidedMove.x,decidedMove.y] == null ||
+            Input_Controller.instance.whiteButtonHolder.transform.childCount +
+            Input_Controller.instance.whiteButtonHolder.transform.childCount == 0 ||
+            Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].IsDamaged == true)
+        {
+            MovePiece();
+            return;
+        }
+        coinFlip = UnityEngine.Random.Range(0, 2);  //0 = capture, 1 = damage
+        Input_Controller.instance.contestHolder.SetActive(true);
+        if (coinFlip == CAPTURE)
+        {
+            Input_Controller.instance.contestText.text = "Piece Capture";
+        }
+        else
+        {
+            Input_Controller.instance.contestText.text = "Piece Damage";
+        }
+    }
+
+    void EndContest()
+    {
+        //TODO: Call if time runs out
+        Input_Controller.instance.contestHolder.SetActive(false);
+        MovePiece(true);
+    }
+
+    void OnContestPressed(object sender, EventArgs e)
+    {
+        Contest();
+    }
+
+    void OnDeclinePressed(object sender, EventArgs e)
+    {
+        EndContest();
+    }
+
+    void MovePiece(bool contest = false)
+    {
+        if(contest == false)
+        {
+            Board_Data.instance.MoveAndTake(selectedPiece, decidedMove.x, decidedMove.y);
+        }
+        else if(coinFlip == CAPTURE)
+        {
+            Board_Data.instance.MoveAndTake(selectedPiece, decidedMove.x, decidedMove.y);
+        }
+        else if(coinFlip == DAMAGE)
+        {
+            Board_Data.instance.MoveAndDamage(selectedPiece, decidedMove.x, decidedMove.y);
+        }
+        else
+        {
+            Debug.LogWarning("Error: Invalid Coin Flip");
+        }
+
+        Board_Display.Instance.UpdatePieces();
+        RemoveHighLightPossibleMoves();
+        RemoveHighlightOnSelectedPiece();
+        phaseInTurn = PhaseInTurn.END_OF_TURN;
+        
     }
 
     void OnRollAgainPressed(object sender, EventArgs e)
     {
 
-        if(phaseInTurn == PhaseInTurn.MOVE_OR_ROLL_AGAIN) {
+        if(phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && rerolled == false) {
             RemoveHighLightPossibleMoves();
             RemoveHighlightOnSelectedPiece();
 
+            rerolled = true;
             phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         }
-
-        /*
-        Debug.Log("Roll again press in " + phaseInTurn.ToString());
-        if (phaseInTurn == PhaseInTurn.MOVE_OR_ROLL_AGAIN) {
-            Debug.Log(phaseInTurn.ToString());
-            RemoveHighLightPossibleMoves();
-        
-            UpdateSelectedPiece();
-        
-            HighLightPossibleMoves();
-        
-            phaseInTurn = PhaseInTurn.MOVE;
-        }
-        */
     }
 
     void OnEndTurnPressed(object sender, EventArgs e)
     {
         RemoveHighLightPossibleMoves();
+        rerolled = false;
         phaseInTurn = PhaseInTurn.END_OF_TURN;
     }
 
@@ -155,7 +204,7 @@ public class Piece_Controller : MonoBehaviour
                     UpdateSelectedPiece();
 
                     HighLightPossibleMoves();
-                    phaseInTurn = PhaseInTurn.MOVE_OR_ROLL_AGAIN;
+                    phaseInTurn = PhaseInTurn.DECIDE_MOVE_OR_REROLL;
                 }
                 else {
                     TargetPieceToSelect();
@@ -164,14 +213,15 @@ public class Piece_Controller : MonoBehaviour
         }
     }
 
-    void HighLightSelectecPiece()
+    void HighLightSelectedPiece()
     {
-        if (highLightGraphic == null) {
-            highLightGraphic = Instantiate(highLightGraphicPrefab, 
+        if (highLightGraphic != null)
+        {
+            Destroy(highLightGraphic);
+        }
+        highLightGraphic = Instantiate(highLightGraphicPrefab, 
                                            selectedPiece.gameObject.transform.position, 
                                            Quaternion.identity);
-
-        }
     }
 
     void RemoveHighlightOnSelectedPiece()
