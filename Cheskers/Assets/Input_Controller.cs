@@ -8,6 +8,8 @@ using static Board_Data;
 
 public class Input_Controller : MonoBehaviour
 {
+    //MULTIPLAYER TODO: Inputs only fire when it is your turn
+
     public static Input_Controller instance;
     [HideInInspector] public Vector3 mouseWorldPosition;
     [HideInInspector] public Vector2Int mouseBoardPosition;
@@ -53,7 +55,17 @@ public class Input_Controller : MonoBehaviour
 
     void OnPieceRemovedFromBoardListener(object sender, PieceRemovedEventArgs e)
     {
-        if(e.removedPiece.GetColor() == Piece_Data.Color.black) {
+        if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
+            GiveContestToken(Piece_Data.Color.black);
+        }
+        else {
+            GiveContestToken(Piece_Data.Color.white);
+        }
+    }
+
+    public void GiveContestToken(Piece_Data.Color color)
+    {
+        if (color == Piece_Data.Color.white) {
             GameObject go = Instantiate(whiteRerollButton, whiteButtonHolder.transform);
             go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
         }
@@ -63,14 +75,16 @@ public class Input_Controller : MonoBehaviour
         }
     }
 
-
     void ButtonPressedReroll()
     {
         OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
     }
 
+
     void ButtonPressedContest()
     {
+        //Check if in the correct phase to register input...
+
         //TODO: Need check for if player is white or black.
         if (Piece_Controller.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, EventArgs.Empty);

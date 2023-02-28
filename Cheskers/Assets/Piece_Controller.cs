@@ -51,6 +51,11 @@ public class Piece_Controller : MonoBehaviour
 
     void OnLeftMouseClick(object sender, EventArgs e)
     {
+        AdvanceGame(true);
+    }
+
+    void AdvanceGame(bool mouseClicked = false)
+    {
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
                 Debug.Log("Applying PIECE_SELECTION");
@@ -91,6 +96,7 @@ public class Piece_Controller : MonoBehaviour
             HighLightSelectedPiece();
 
             phaseInTurn = PhaseInTurn.PIECE_CONFIRMATION;
+            //Happens on click, Game automatically advances
         }
     }
 
@@ -101,6 +107,7 @@ public class Piece_Controller : MonoBehaviour
         {
             if(decidedMove == move)
             {
+                //Starts the first contest
                 phaseInTurn = PhaseInTurn.CONTEST;
                 Contest();
             }
@@ -114,6 +121,7 @@ public class Piece_Controller : MonoBehaviour
             Input_Controller.instance.whiteButtonHolder.transform.childCount == 0 ||
             Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].IsDamaged == true)
         {
+            //Skip Contest Phase
             MovePiece();
             return;
         }
@@ -138,7 +146,15 @@ public class Piece_Controller : MonoBehaviour
 
     void OnContestPressed(object sender, EventArgs e)
     {
-        Contest();
+        if (phaseInTurn == PhaseInTurn.CONTEST) {
+            Contest();
+        }
+        else {
+            //Refund Token used
+            //TODO: Check who used the token probably should be done in the input controller
+            //Only inputs from player who's turn it is count in future multiplayer.
+            Input_Controller.instance.GiveContestToken(Piece_Data.Color.white);
+        }
     }
 
     void OnDeclinePressed(object sender, EventArgs e)
