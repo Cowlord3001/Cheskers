@@ -6,13 +6,15 @@ using UnityEngine;
 
 public class Piece_Controller : NetworkBehaviour
 {
+    public static Piece_Controller instance;
+
     [SerializeField] Chess_Move_SO[] chessMoves;
     [SerializeField] GameObject highLightGraphicPrefab;
     GameObject highLightGraphic;
 
     Piece_Data selectedPiece;
 
-    List<Vector2Int> possibleMoves;
+    List<Vector2Int> validMoves;
 
     bool isYourTurn;
     public static Piece_Data.Color color = Piece_Data.Color.white;
@@ -24,7 +26,16 @@ public class Piece_Controller : NetworkBehaviour
     const int CAPTURE = 0;
     const int DAMAGE = 1;
 
-    enum PhaseInTurn
+    public event EventHandler<EventArgsOnValidMovesHighlighted> OnValidMovesHighlighted;
+    public class EventArgsOnValidMovesHighlighted { public Vector2Int[] validMoves; }
+
+    public event EventHandler<EventArgsOnValidMovesDeHighlighted> OnValidMovesDeHighlighted;
+    public class EventArgsOnValidMovesDeHighlighted { public Vector2Int[] validMoves; }
+
+    public event EventHandler<EventArgsOnPieceTransformed> OnPieceTransformed;
+    public class EventArgsOnPieceTransformed { public Piece_Data Piece; public int randomMove; };
+
+    public enum PhaseInTurn
     {
         PIECE_SELECTION,
         PIECE_CONFIRMATION,
@@ -34,11 +45,12 @@ public class Piece_Controller : NetworkBehaviour
         END_OF_TURN // Piece movement should only be finalized here after options to reroll given
     }
 
-    PhaseInTurn phaseInTurn;
+    public PhaseInTurn phaseInTurn { get; private set; }
     // Start is called before the first frame update
     void Start()
     {
         if (IsOwner == false) return;
+        instance = this;
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
@@ -106,7 +118,7 @@ public class Piece_Controller : NetworkBehaviour
     void DecideMove()
     {
         decidedMove = Input_Controller.instance.mouseBoardPosition;
-        foreach (var move in possibleMoves)
+        foreach (var move in validMoves)
         {
             if(decidedMove == move)
             {
@@ -193,7 +205,6 @@ public class Piece_Controller : NetworkBehaviour
 
     void OnRollAgainPressed(object sender, EventArgs e)
     {
-
         if(phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && rerolled == false) {
             RemoveHighLightPossibleMoves();
             RemoveHighlightOnSelectedPiece();
@@ -220,7 +231,7 @@ public class Piece_Controller : NetworkBehaviour
                 if (selectedPiece == pieceData) {
 
                     selectedPiece = pieceData;
-                    UpdateSelectedPiece();
+                    TransformSelectedPiece();
 
                     HighLightPossibleMoves();
                     phaseInTurn = PhaseInTurn.DECIDE_MOVE_OR_REROLL;
@@ -250,44 +261,58 @@ public class Piece_Controller : NetworkBehaviour
         }
     }
 
-    void UpdateSelectedPiece()
+    void TransformSelectedPiece()
     {
         int randomMove = UnityEngine.Random.Range(0, chessMoves.Length);
 
-        possibleMoves = Board_Data.instance.getAllLegalMoves(selectedPiece, chessMoves[randomMove]);
+        validMoves = Board_Data.instance.getAllLegalMoves(selectedPiece, chessMoves[randomMove]);
 
         selectedPiece.type = chessMoves[randomMove].pieceType;
         selectedPiece.gameObject.GetComponent<SpriteRenderer>().sprite =
                 chessMoves[randomMove].GetSprite(selectedPiece.GetColor(), selectedPiece.IsDamaged);
+
+        EventArgsOnPieceTransformed e = new EventArgsOnPieceTransformed();
+        e.Piece = selectedPiece;
+        e.randomMove = randomMove;
+
+        OnPieceTransformed?.Invoke(this, e);
     }
     void HighLightPossibleMoves()
     {
-        foreach (Vector2Int moveLocation in possibleMoves) {
+        foreach (Vector2Int moveLocation in validMoves) {
             SpriteRenderer spriteRenderer = Board_Display.Instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, .1f);
         }
+
+        EventArgsOnValidMovesHighlighted e = new EventArgsOnValidMovesHighlighted();
+        e.validMoves = validMoves.ToArray();
+        OnValidMovesHighlighted?.Invoke(this, e);
     }
 
     void RemoveHighLightPossibleMoves()
     {
-        if (possibleMoves == null) {
+        if (validMoves == null) {
             Debug.LogWarning("Removing Highlighted Tiles with any moves");
             return;
         }
 
-        foreach (Vector2Int moveLocation in possibleMoves) {
+        foreach (Vector2Int moveLocation in validMoves) {
             SpriteRenderer spriteRenderer = Board_Display.Instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1f);
         }
+
+        EventArgsOnValidMovesDeHighlighted e = new EventArgsOnValidMovesDeHighlighted();
+        e.validMoves = validMoves.ToArray();
+        OnValidMovesDeHighlighted?.Invoke(this, e);
     }
 
     //SHOULD BE ON ANOTHER SCRIPT MAYBE A DISCARD AREA IN THE FUTURE
-    void OnPieceRemoved(object sender, Board_Data.PieceRemovedEventArgs e)
+    void OnPieceRemoved(object sender, Board_Data.EventArgsPieceRemoved e)
     {
         Destroy(e.removedPiece.gameObject);
     }
     
-    void OnPieceDamaged(object sender, Board_Data.PieceDamageEventArgs e)
+    void OnPieceDamaged(object sender, Board_Data.EventArgsPieceDamaged e)
     {
         Board_Display.Instance.UpdatePieces();
     }

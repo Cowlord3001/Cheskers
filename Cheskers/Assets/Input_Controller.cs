@@ -51,7 +51,7 @@ public class Input_Controller : MonoBehaviour
         contestHolder.SetActive(false);
     }
 
-    void OnPieceRemovedFromBoardListener(object sender, Board_Data.PieceRemovedEventArgs e)
+    void OnPieceRemovedFromBoardListener(object sender, Board_Data.EventArgsPieceRemoved e)
     {
         if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
             GiveContestToken(Piece_Data.Color.black);
@@ -82,6 +82,7 @@ public class Input_Controller : MonoBehaviour
     void ButtonPressedContest()
     {
         //Check if in the correct phase to register input...
+        if(Piece_Controller.instance.phaseInTurn != Piece_Controller.PhaseInTurn.CONTEST) { return; }
 
         //TODO: Need check for if player is white or black.
         if (Piece_Controller.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
@@ -96,6 +97,8 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedDecline()
     {
+        if (Piece_Controller.instance.phaseInTurn != Piece_Controller.PhaseInTurn.CONTEST) { return; }
+
         OnDeclineButtonClicked?.Invoke(this, EventArgs.Empty);
     }
 

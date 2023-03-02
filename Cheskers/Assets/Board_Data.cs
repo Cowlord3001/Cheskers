@@ -13,18 +13,23 @@ public class Board_Data
     public int size { get; private set; }
 
     //Event for when pieces are removed from board in case we want some effect to play in another script
-    public event EventHandler<PieceRemovedEventArgs> OnPieceRemovedFromBoard;
-    public class PieceRemovedEventArgs : EventArgs {
+    public event EventHandler<EventArgsPieceRemoved> OnPieceRemovedFromBoard;
+    public class EventArgsPieceRemoved : EventArgs {
         public Piece_Data removedPiece;
-        public Piece_Data takingPiece;
     }
 
     //Event for when a piece is damaged in case we want some effect to play in another script.
-    public event EventHandler<PieceDamageEventArgs> OnPieceDamaged;
-    public class PieceDamageEventArgs : EventArgs
+    public event EventHandler<EventArgsPieceDamaged> OnPieceDamaged;
+    public class EventArgsPieceDamaged : EventArgs
     {
         public Piece_Data damagedPiece;
-        public Piece_Data damagingPiece;
+    }
+    //Add Event for when piece is moved
+    public event EventHandler<EventArgsPieceMoved> OnPieceMoved;
+    public class EventArgsPieceMoved : EventArgs
+    {
+        public Vector2Int pieceStartBoardCordintaes;
+        public Vector2Int pieceEndBoardCordintaes;
     }
 
     //TODO: Add Event for piece moved
@@ -209,16 +214,22 @@ public class Board_Data
     void Damage(int pieceToDamagePositionX, int pieceToDamagePositionY)
     {
         boardPieces[pieceToDamagePositionX, pieceToDamagePositionY].IsDamaged = true;
-        PieceDamageEventArgs e = new PieceDamageEventArgs();
+        EventArgsPieceDamaged e = new EventArgsPieceDamaged();
         e.damagedPiece = boardPieces[pieceToDamagePositionX, pieceToDamagePositionY];
         OnPieceDamaged(this, e);
     }
 
     void Move(Piece_Data piece, int newXPos, int newYPos)
     {
+        EventArgsPieceMoved e = new EventArgsPieceMoved();
+        e.pieceStartBoardCordintaes = piece.positionOnBoard;
+        e.pieceEndBoardCordintaes = new Vector2Int(newXPos, newYPos);
+        OnPieceMoved?.Invoke(this, e);
+
         boardPieces[newXPos, newYPos] = piece;
         boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
         piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
+
     }
 
     public bool MoveAndTake(Piece_Data piece, int newXPos, int newYPos)
@@ -247,7 +258,7 @@ public class Board_Data
     private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
     {
         //Fire Remove Piece Event
-        PieceRemovedEventArgs e = new PieceRemovedEventArgs();
+        EventArgsPieceRemoved e = new EventArgsPieceRemoved();
         e.removedPiece = boardPieces[removeX, removeY];
         OnPieceRemovedFromBoard?.Invoke(this, e);
 
