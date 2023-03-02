@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.tvOS;
 
 public class Board_Data
 {
@@ -17,6 +16,7 @@ public class Board_Data
     public event EventHandler<PieceRemovedEventArgs> OnPieceRemovedFromBoard;
     public class PieceRemovedEventArgs : EventArgs {
         public Piece_Data removedPiece;
+        public Piece_Data takingPiece;
     }
 
     //Event for when a piece is damaged in case we want some effect to play in another script.
@@ -24,7 +24,10 @@ public class Board_Data
     public class PieceDamageEventArgs : EventArgs
     {
         public Piece_Data damagedPiece;
+        public Piece_Data damagingPiece;
     }
+
+    //TODO: Add Event for piece moved
 
     const int MOVING_TO_EMPTY = 0;
     const int MOVING_TO_ENEMYPIECE = 1;
@@ -217,6 +220,7 @@ public class Board_Data
         boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
         piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
     }
+
     public bool MoveAndTake(Piece_Data piece, int newXPos, int newYPos)
     {
 

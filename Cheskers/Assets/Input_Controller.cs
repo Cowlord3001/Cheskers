@@ -1,10 +1,8 @@
-using Palmmedia.ReportGenerator.Core.Parser.Analysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static Board_Data;
 
 public class Input_Controller : MonoBehaviour
 {
@@ -53,7 +51,7 @@ public class Input_Controller : MonoBehaviour
         contestHolder.SetActive(false);
     }
 
-    void OnPieceRemovedFromBoardListener(object sender, PieceRemovedEventArgs e)
+    void OnPieceRemovedFromBoardListener(object sender, Board_Data.PieceRemovedEventArgs e)
     {
         if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
             GiveContestToken(Piece_Data.Color.black);
@@ -109,11 +107,16 @@ public class Input_Controller : MonoBehaviour
 
     private void Update()
     {
+
+
         if(developerCommandsEnabled)
         {
             if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }
             if(Input.GetKeyDown(KeyCode.T)) { Instantiate(whiteRerollButton, whiteButtonHolder.transform); }
         }
+
+        //Temporary till hosting scene is seperate.
+        if(Camera.main == null) { return; }
 
         mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition.x,mouseWorldPosition.y);

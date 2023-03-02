@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
-using static Board_Data;
 
-public class Piece_Controller : MonoBehaviour
+public class Piece_Controller : NetworkBehaviour
 {
     [SerializeField] Chess_Move_SO[] chessMoves;
     [SerializeField] GameObject highLightGraphicPrefab;
@@ -38,6 +38,7 @@ public class Piece_Controller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (IsOwner == false) return;
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
@@ -51,11 +52,13 @@ public class Piece_Controller : MonoBehaviour
 
     void OnLeftMouseClick(object sender, EventArgs e)
     {
+        if (IsOwner == false) return;
         AdvanceGame(true);
     }
 
     void AdvanceGame(bool mouseClicked = false)
     {
+        if (IsOwner == false) return;
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
                 Debug.Log("Applying PIECE_SELECTION");
@@ -279,12 +282,12 @@ public class Piece_Controller : MonoBehaviour
     }
 
     //SHOULD BE ON ANOTHER SCRIPT MAYBE A DISCARD AREA IN THE FUTURE
-    void OnPieceRemoved(object sender, PieceRemovedEventArgs e)
+    void OnPieceRemoved(object sender, Board_Data.PieceRemovedEventArgs e)
     {
         Destroy(e.removedPiece.gameObject);
     }
     
-    void OnPieceDamaged(object sender, PieceDamageEventArgs e)
+    void OnPieceDamaged(object sender, Board_Data.PieceDamageEventArgs e)
     {
         Board_Display.Instance.UpdatePieces();
     }
