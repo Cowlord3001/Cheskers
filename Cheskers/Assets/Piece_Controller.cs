@@ -16,8 +16,7 @@ public class Piece_Controller : NetworkBehaviour
 
     List<Vector2Int> validMoves;
 
-    bool isYourTurn;
-    public static Piece_Data.Color color = Piece_Data.Color.white;
+    public Piece_Data.Color color = Piece_Data.Color.black;
 
     Vector2Int decidedMove;
     bool rerolled = false;
@@ -25,6 +24,9 @@ public class Piece_Controller : NetworkBehaviour
 
     const int CAPTURE = 0;
     const int DAMAGE = 1;
+
+    public event EventHandler<EventArgsOnContestStarted> OnContestStarted;
+    public class EventArgsOnContestStarted { public int coinFlip; }
 
     public event EventHandler<EventArgsOnValidMovesHighlighted> OnValidMovesHighlighted;
     public class EventArgsOnValidMovesHighlighted { public Vector2Int[] validMoves; }
@@ -42,7 +44,8 @@ public class Piece_Controller : NetworkBehaviour
         DECIDE_MOVE_OR_REROLL,//TODO: OnlyReroll Once(AfterDebugging done on movesets)
         CONTEST,//TODO: Add a reroll option that uses resources(dont exist yet)
         MOVE_AND_UPDATE,
-        END_OF_TURN // Piece movement should only be finalized here after options to reroll given
+        END_OF_TURN, // Piece movement should only be finalized here after options to reroll given
+        WAITING_FOR_TURN
     }
 
     public PhaseInTurn phaseInTurn { get; private set; }
@@ -62,39 +65,45 @@ public class Piece_Controller : NetworkBehaviour
         Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
     }
 
+    //Event only fires on mouseclicks on the board
     void OnLeftMouseClick(object sender, EventArgs e)
     {
         if (IsOwner == false) return;
+        if (Network_Controller.instance.turnColor.Value != color) { return; }
         AdvanceGame(true);
     }
 
     void AdvanceGame(bool mouseClicked = false)
     {
         if (IsOwner == false) return;
+        if (Network_Controller.instance.turnColor.Value != color) { return; }
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
-                Debug.Log("Applying PIECE_SELECTION");
+                Debug.Log("PIECE_SELECTION");
                 TargetPieceToSelect();
                 break;
             case PhaseInTurn.PIECE_CONFIRMATION:                // DONE
-                Debug.Log("Applying PIECE_CONFIRMATION");
+                Debug.Log("PIECE_CONFIRMATION");
                 PieceSelection();
                 break;
             case PhaseInTurn.DECIDE_MOVE_OR_REROLL:
-                Debug.Log("Applying DECIDE_MOVE_OR_REROLL");    // DONE
+                Debug.Log("DECIDE_MOVE_OR_REROLL");    // DONE
                 DecideMove();
                 break;
             case PhaseInTurn.CONTEST:
-                Debug.Log("Applying CONTEST");                  // DONE
+                Debug.Log("CONTEST");
+                Contest();                  // DONE
                 break;
             case PhaseInTurn.MOVE_AND_UPDATE:
-                Debug.Log("Applying MOVE_AND_UPDATE");          // DONE
+                Debug.Log("MOVE_AND_UPDATE");
+                MovePiece();        // DONE
                 break;
             case PhaseInTurn.END_OF_TURN:
-                Debug.Log("Applying END_OF_TURN");
+                Debug.Log("END_OF_TURN");
+                EndTurn();
                 //For Testing turn back to start of turn
                 rerolled = false;
-                phaseInTurn = PhaseInTurn.PIECE_SELECTION;
+                //phaseInTurn = PhaseInTurn.PIECE_SELECTION;
                 break;
             default:
                 break;
@@ -105,6 +114,8 @@ public class Piece_Controller : NetworkBehaviour
     {
         Piece_Data piece = Piece_Detection.GetPieceUnderMouse();
         if(piece != null) {
+
+            if(piece.GetColor() != color) { return; }
             selectedPiece = piece;
 
             //Debug.Log(selectedPiece.gameObject.name);
@@ -124,7 +135,7 @@ public class Piece_Controller : NetworkBehaviour
             {
                 //Starts the first contest
                 phaseInTurn = PhaseInTurn.CONTEST;
-                Contest();
+                AdvanceGame();
             }
         }
     }
@@ -132,15 +143,25 @@ public class Piece_Controller : NetworkBehaviour
     void Contest()
     {
         if (Board_Data.instance.boardPieces[decidedMove.x,decidedMove.y] == null ||
-            Input_Controller.instance.whiteButtonHolder.transform.childCount +
-            Input_Controller.instance.whiteButtonHolder.transform.childCount == 0 ||
             Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].IsDamaged == true)
         {
             //Skip Contest Phase
-            MovePiece();
+            phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
+            AdvanceGame();
             return;
         }
         coinFlip = UnityEngine.Random.Range(0, 2);  //0 = capture, 1 = damage
+
+        if(Input_Controller.instance.whiteButtonHolder.transform.childCount +
+            Input_Controller.instance.whiteButtonHolder.transform.childCount == 0) {
+            phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
+            AdvanceGame();
+            return;
+        }
+
+        EventArgsOnContestStarted e = new EventArgsOnContestStarted();
+        OnContestStarted?.Invoke(this, e);
+
         Input_Controller.instance.contestHolder.SetActive(true);
         if (coinFlip == CAPTURE)
         {
@@ -152,17 +173,12 @@ public class Piece_Controller : NetworkBehaviour
         }
     }
 
-    void EndContest()
-    {
-        //TODO: Call if time runs out
-        Input_Controller.instance.contestHolder.SetActive(false);
-        MovePiece(true);
-    }
 
     void OnContestPressed(object sender, EventArgs e)
     {
         if (phaseInTurn == PhaseInTurn.CONTEST) {
-            Contest();
+            //Starts a new contest by advancing gamewithout changing phase
+            AdvanceGame();
         }
         else {
             //Refund Token used
@@ -176,19 +192,23 @@ public class Piece_Controller : NetworkBehaviour
     {
         EndContest();
     }
-
-    void MovePiece(bool contest = false)
+    void EndContest()
     {
-        if(contest == false)
-        {
-            Board_Data.instance.MoveAndTake(selectedPiece, decidedMove.x, decidedMove.y);
-        }
-        else if(coinFlip == CAPTURE)
+        //TODO: Call if time runs out
+        Input_Controller.instance.contestHolder.SetActive(false);
+        phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
+        AdvanceGame();
+    }
+
+    void MovePiece()
+    {
+        if(coinFlip == CAPTURE)
         {
             Board_Data.instance.MoveAndTake(selectedPiece, decidedMove.x, decidedMove.y);
         }
         else if(coinFlip == DAMAGE)
         {
+            Debug.Log(coinFlip);
             Board_Data.instance.MoveAndDamage(selectedPiece, decidedMove.x, decidedMove.y);
         }
         else
@@ -200,6 +220,7 @@ public class Piece_Controller : NetworkBehaviour
         RemoveHighLightPossibleMoves();
         RemoveHighlightOnSelectedPiece();
         phaseInTurn = PhaseInTurn.END_OF_TURN;
+        AdvanceGame();
         
     }
 
@@ -216,9 +237,16 @@ public class Piece_Controller : NetworkBehaviour
 
     void OnEndTurnPressed(object sender, EventArgs e)
     {
+        EndTurn();
+    }
+
+    void EndTurn()
+    {
         RemoveHighLightPossibleMoves();
         rerolled = false;
-        phaseInTurn = PhaseInTurn.END_OF_TURN;
+        phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
+        //TODO: Set turn to next turn
+
     }
 
     void PieceSelection()

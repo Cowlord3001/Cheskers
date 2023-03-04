@@ -85,11 +85,11 @@ public class Input_Controller : MonoBehaviour
         if(Piece_Controller.instance.phaseInTurn != Piece_Controller.PhaseInTurn.CONTEST) { return; }
 
         //TODO: Need check for if player is white or black.
-        if (Piece_Controller.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
+        if (Piece_Controller.instance.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, EventArgs.Empty);
             Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
         }
-        else if (Piece_Controller.color == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
+        else if (Piece_Controller.instance.color == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, EventArgs.Empty);
             Destroy(blackButtonHolder.transform.GetChild(0).gameObject);
         }

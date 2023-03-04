@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class Player_Camera : MonoBehaviour
 {
-    [SerializeField] private Camera camera;
+    [SerializeField] private Camera cam;
 
     // Start is called before the first frame update
     void Start()
     {
-        camera.enabled = true;
+        cam.enabled = true;
     }
 
 }
