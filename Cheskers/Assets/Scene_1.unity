@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731193, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -213,8 +213,9 @@ GameObject:
   m_Component:
   - component: {fileID: 31771925}
   - component: {fileID: 31771924}
+  - component: {fileID: 31771926}
   m_Layer: 0
-  m_Name: Board
+  m_Name: BoardAndPieces
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -234,12 +235,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blackTile: {fileID: 6954638897373534355, guid: ad1188903712b134783a52a1337e9fd2, type: 3}
   whiteTile: {fileID: 3223008932782842338, guid: 53324227eb28fd94db5ce120c12ad09b, type: 3}
-  whitePiece: {fileID: 3636667184417211457, guid: 4436ef32c185c29439040d469c305a3d, type: 3}
-  blackPiece: {fileID: 8674135343503664730, guid: 7add9cf8020ae074dbca4abad2cc7469, type: 3}
-  blackSprite: {fileID: 21300000, guid: e6969be7dc7d16c40abd10649f0fe1a9, type: 3}
-  whiteSprite: {fileID: 21300000, guid: ec9bc38497d43e44eb13191125517111, type: 3}
-  blackDamagedSprite: {fileID: 21300000, guid: 3e4349bdc8447c044b14651750e1faca, type: 3}
-  whiteDamagedSprite: {fileID: 21300000, guid: 366ecb732fac65b4a8de4c23bc465e83, type: 3}
 --- !u!4 &31771925
 Transform:
   m_ObjectHideFlags: 0
@@ -255,6 +250,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &31771926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31771923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c71e104efc4a73647805ae2f50725173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chessMoves:
+  - {fileID: 11400000, guid: 1bcc147ff12abcb4bb7cb0220c2bdc4b, type: 2}
+  - {fileID: 11400000, guid: 3721e2788b84760438cde65d7ee67fa6, type: 2}
+  - {fileID: 11400000, guid: 4465c50de0fffd7438027f46837d2a9c, type: 2}
+  - {fileID: 11400000, guid: d61dae48f7219b34c891545c1005597a, type: 2}
+  - {fileID: 11400000, guid: 7ee74989e6d254845868b933bf028cbc, type: 2}
+  - {fileID: 11400000, guid: 8f4c4c13264246840874675ffae038c3, type: 2}
+  whitePiece: {fileID: 3636667184417211457, guid: 4436ef32c185c29439040d469c305a3d, type: 3}
+  blackPiece: {fileID: 8674135343503664730, guid: 7add9cf8020ae074dbca4abad2cc7469, type: 3}
+  blackSprite: {fileID: 21300000, guid: e6969be7dc7d16c40abd10649f0fe1a9, type: 3}
+  whiteSprite: {fileID: 21300000, guid: ec9bc38497d43e44eb13191125517111, type: 3}
+  blackDamagedSprite: {fileID: 21300000, guid: 3e4349bdc8447c044b14651750e1faca, type: 3}
+  whiteDamagedSprite: {fileID: 21300000, guid: 366ecb732fac65b4a8de4c23bc465e83, type: 3}
 --- !u!1 &48282108
 GameObject:
   m_ObjectHideFlags: 0

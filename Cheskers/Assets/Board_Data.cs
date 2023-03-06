@@ -8,7 +8,7 @@ public class Board_Data
     //Singleton
     public static Board_Data instance;
 
-    //public static string debugMessage;
+    public string debugMessage;
     public Piece_Data[,] boardPieces { get; private set; }
     public int size { get; private set; }
 
@@ -40,7 +40,7 @@ public class Board_Data
 
     public Board_Data()
     {
-        //debugMessage = "";
+        debugMessage = "";
         size = 8;
         boardPieces = new Piece_Data[size, size];
         for (int y = 0; y < size; y++)
@@ -228,7 +228,6 @@ public class Board_Data
 
     private void MovePiece(Piece_Data piece, int newXPos, int newYPos)
     {
-
         EventArgsPieceMoved e = new EventArgsPieceMoved();
         e.pieceStartBoardCordintaes = piece.positionOnBoard;
         e.pieceEndBoardCordintaes = new Vector2Int(newXPos, newYPos);

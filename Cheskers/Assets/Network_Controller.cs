@@ -25,17 +25,22 @@ public class Network_Controller : NetworkBehaviour
 
     private void Start()
     {
-        NetworkVariable<Piece_Data.Color> turnColor = 
+        NetworkVariable<Piece_Data.Color> turnColor =
             new NetworkVariable<Piece_Data.Color>(Piece_Data.Color.white);
         //Detecting Game being hosted and clinet joining
         Multiplater_UI.OnGameHosted += OnGameHosted;
         Multiplater_UI.OnGameClientJoined += OnGameClientJoined;
 
+        //Piece and Board Display Events
+        Piece_Display.instance.OnPieceTransformed += OnPieceTransformed;
+        Board_Display.instance.OnValidMovesHighlighted += OnValidMovesHighlighted;
+        Board_Display.instance.OnValidMovesDeHighlighted += OnValidMovesDeHighlighted;
+
         //Calls from changes to pieces
         Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemovedFromBoard;
         Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
         Board_Data.instance.OnPieceMoved += OnPieceMoved;
-        
+
         //Calls from inputcontroller
         //TODO:Need to check or send information about who is clicking the buttons.
         Input_Controller.instance.OnContestButtonClicked += OnContestButtonPressed;
@@ -53,7 +58,7 @@ public class Network_Controller : NetworkBehaviour
         Piece_Controller.instance.color = Piece_Data.Color.white;
         Piece_Controller.instance.StartTurn();
         SubscribeToPieceControllerEvents();
-        
+
     }
     void OnGameClientJoined(object sender, EventArgs e)
     {
@@ -63,9 +68,6 @@ public class Network_Controller : NetworkBehaviour
     void SubscribeToPieceControllerEvents()
     {
         if (Piece_Controller.instance != null) {
-            Piece_Controller.instance.OnPieceTransformed += OnPieceTransformed;
-            Piece_Controller.instance.OnValidMovesHighlighted += OnValidMovesHighlighted;
-            Piece_Controller.instance.OnValidMovesDeHighlighted += OnValidMovesDeHighlighted;
             Piece_Controller.instance.OnContestStarted += OnContestStarting;
             Piece_Controller.instance.OnEndOfTurn += OnEndTurn;
         }
@@ -101,18 +103,34 @@ public class Network_Controller : NetworkBehaviour
 
     #region GraphicsUpdates
     //Transforming Pieces and Highlighted Squares
-    void OnPieceTransformed(object sender, Piece_Controller.EventArgsOnPieceTransformed e)
+    void OnPieceTransformed(object sender, Piece_Display.EventArgsOnPieceTransformed e)
     {
         Debug.Log("NETWORK_EVENT: TransformedEvent Detected");
+        if (turnColor.Value == Piece_Controller.instance.color) {
+            //If a piece was transformed on your turn you need to tell the other player
+            PieceTransformedServerRpc(e.Piece.positionOnBoard.x, e.Piece.positionOnBoard.y, e.chessMoveIndex, Piece_Controller.instance.color);
 
+        }
     }
-
-    void OnValidMovesHighlighted(object sender, Piece_Controller.EventArgsOnValidMovesHighlighted e)
+    [ServerRpc(RequireOwnership = false)]
+    void PieceTransformedServerRpc(int pieceXPos, int pieceYPos, int chessMoveIndex, Piece_Data.Color colorCallingUpdate){
+        PieceTransformedClientRpc(pieceXPos, pieceYPos, chessMoveIndex, colorCallingUpdate);
+    }
+    [ClientRpc]
+    void PieceTransformedClientRpc(int pieceXPos, int pieceYpos, int chessMoveIndex, Piece_Data.Color colorCallingUpdate)
+    {
+        Debug.Log("CLIENTRPC: Piece Transformed");
+        if(colorCallingUpdate != Piece_Controller.instance.color) {
+            //Piece_Controller.instance.TransformSelectedPiece();
+            Piece_Display.instance.TransformSelectedPiece(Board_Data.instance.boardPieces[pieceXPos, pieceYpos], chessMoveIndex);
+        }
+    }
+    void OnValidMovesHighlighted(object sender, Board_Display.EventArgsOnValidMovesHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesHighlighted Detected");
     }
     //Removing Highlights from Squares
-    void OnValidMovesDeHighlighted(object sender, Piece_Controller.EventArgsOnValidMovesDeHighlighted e)
+    void OnValidMovesDeHighlighted(object sender, Board_Display.EventArgsOnValidMovesDeHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesDeHighlighted Detected");
 
@@ -143,7 +161,7 @@ public class Network_Controller : NetworkBehaviour
     [ClientRpc]
     void EndTurnClientRPC()
     {
-        Debug.Log("Client EndTurn Client RPC Called");
+        Debug.Log("CLIENT RPC: End Turn");
         //This is called on all clients. 
         if (turnColor.Value == Piece_Data.Color.white) {
             if (Piece_Controller.instance.color == Piece_Data.Color.black) {
@@ -186,7 +204,7 @@ public class Network_Controller : NetworkBehaviour
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.RemovePiece(pieceRemovedXBoardLocation, pieceRemoveYBoardLocation);
         }
-        Board_Display.Instance.UpdatePieces();
+        Piece_Display.instance.UpdatePieces();
     }
 
     //Sync when a piece is damaged
@@ -213,7 +231,7 @@ public class Network_Controller : NetworkBehaviour
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.DamagePiece(pieceDamagedXBoardLocation, pieceDamagedYBoardLocation);
         }
-        Board_Display.Instance.UpdatePieces();
+        Piece_Display.instance.UpdatePieces();
     }
     //Sync when a piece is moved
     void OnPieceMoved(object sender, Board_Data.EventArgsPieceMoved e)
@@ -241,7 +259,7 @@ public class Network_Controller : NetworkBehaviour
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.MovePieceExternal(oldXPos, oldYPos, newXPos, newYPos);
         }
-        Board_Display.Instance.UpdatePieces();
+        Piece_Display.instance.UpdatePieces();
     }
 
     #endregion

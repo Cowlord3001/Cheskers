@@ -5,17 +5,15 @@ using UnityEngine;
 public class  Piece_Data
 {
     public GameObject gameObject;
+    public Vector2Int positionOnBoard;
     public enum Type {pawn, bishop, knight, rook, queen, king, none};
     public Type type = Type.none;
     public enum Color { white, black };
     Color color;
-    public bool hasMoved;
     
     bool IsVIP;//Not Used Yet
     public bool IsDamaged;
-    
-    public Vector2Int positionOnBoard;
-
+    public bool hasMoved;
     public Color GetColor()
     {
         return color;
