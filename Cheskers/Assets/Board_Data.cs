@@ -178,12 +178,21 @@ public class Board_Data
         return ExtraMoves;
     }
 
-    public bool MoveAndDamage(Piece_Data piece, int newXPos, int newYPos)
+    public void MoveAndDamage(Piece_Data piece, int newXPos, int newYPos)
     {
+        if (boardPieces[newXPos,newYPos] == null) {
+            MovePiece(piece, newXPos, newYPos);
+            return;
+        }
+        if(boardPieces[newXPos, newYPos].IsDamaged == true) {
+            MoveAndTake(piece, newXPos, newYPos);
+            return;
+        }
+
         if(piece.type == Piece_Data.Type.knight ||
            piece.type == Piece_Data.Type.pawn   ||
            piece.type == Piece_Data.Type.king) {
-           Damage(newXPos, newYPos);
+           DamagePiece(newXPos, newYPos);
         }
         else {
             //Calculate where to land.
@@ -200,18 +209,16 @@ public class Board_Data
             }
             else
             {
-                Move(piece, newXPos - deltaX, newYPos - deltaY);
+                MovePiece(piece, newXPos - deltaX, newYPos - deltaY);
             }
 
-            Damage(newXPos, newYPos);
+            DamagePiece(newXPos, newYPos);
 
         }
 
-
-        return true;
     }
 
-    void Damage(int pieceToDamagePositionX, int pieceToDamagePositionY)
+    public void DamagePiece(int pieceToDamagePositionX, int pieceToDamagePositionY)
     {
         boardPieces[pieceToDamagePositionX, pieceToDamagePositionY].IsDamaged = true;
         EventArgsPieceDamaged e = new EventArgsPieceDamaged();
@@ -219,8 +226,9 @@ public class Board_Data
         OnPieceDamaged(this, e);
     }
 
-    void Move(Piece_Data piece, int newXPos, int newYPos)
+    private void MovePiece(Piece_Data piece, int newXPos, int newYPos)
     {
+
         EventArgsPieceMoved e = new EventArgsPieceMoved();
         e.pieceStartBoardCordintaes = piece.positionOnBoard;
         e.pieceEndBoardCordintaes = new Vector2Int(newXPos, newYPos);
@@ -230,6 +238,13 @@ public class Board_Data
         boardPieces[piece.positionOnBoard.x, piece.positionOnBoard.y] = null;
         piece.positionOnBoard = new Vector2Int(newXPos, newYPos);
 
+    }
+
+    public void MovePieceExternal(int oldXPos, int oldYPos, int newXPos, int newYPos)
+    {
+        if(boardPieces[oldXPos, oldYPos] == null) { return; }
+
+        MovePiece(boardPieces[oldXPos, oldYPos], newXPos, newYPos);
     }
 
     public bool MoveAndTake(Piece_Data piece, int newXPos, int newYPos)
@@ -243,26 +258,26 @@ public class Board_Data
         piece.hasMoved = true;
 
         if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
-            RemovePiece(piece, newXPos, newYPos);
-            Move(piece, newXPos, newYPos);
+            RemovePiece(newXPos, newYPos);
+            MovePiece(piece, newXPos, newYPos);
         }
 
         //Moving to EmptySpace
         if(moveValidateResult == MOVING_TO_EMPTY) {
-            Move(piece, newXPos, newYPos);
+            MovePiece(piece, newXPos, newYPos);
         }
 
         return true;
     }
 
-    private void RemovePiece(Piece_Data pieceThatisTaking, int removeX, int removeY)
+    public void RemovePiece(int removeX, int removeY)
     {
         //Fire Remove Piece Event
         EventArgsPieceRemoved e = new EventArgsPieceRemoved();
         e.removedPiece = boardPieces[removeX, removeY];
         OnPieceRemovedFromBoard?.Invoke(this, e);
 
-
+        boardPieces[removeX, removeY] = null;
     }
 
     private int ValidMove(Piece_Data.Color color, int newXPos, int newYPos)

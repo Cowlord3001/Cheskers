@@ -18,12 +18,12 @@ public class Multiplater_UI : MonoBehaviour
     {
         hostButton.onClick.AddListener(() => {
             GetComponent<NetworkManager>().StartHost();
-            Invoke("GameHosted", .2f);
+            Invoke("GameHosted", 1f);
             }
             ) ;
         clientButton.onClick.AddListener(() => {
             GetComponent<NetworkManager>().StartClient();
-            Invoke("ClinetJoined", .2f);
+            Invoke("ClinetJoined", 1f);
         }
             );
     }

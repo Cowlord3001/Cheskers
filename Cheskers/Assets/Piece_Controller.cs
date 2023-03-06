@@ -16,6 +16,7 @@ public class Piece_Controller : NetworkBehaviour
 
     List<Vector2Int> validMoves;
 
+    //Host sets themself to white so default color is black
     public Piece_Data.Color color = Piece_Data.Color.black;
 
     Vector2Int decidedMove;
@@ -24,6 +25,8 @@ public class Piece_Controller : NetworkBehaviour
 
     const int CAPTURE = 0;
     const int DAMAGE = 1;
+
+    public event EventHandler OnEndOfTurn;
 
     public event EventHandler<EventArgsOnContestStarted> OnContestStarted;
     public class EventArgsOnContestStarted { public int coinFlip; }
@@ -36,6 +39,12 @@ public class Piece_Controller : NetworkBehaviour
 
     public event EventHandler<EventArgsOnPieceTransformed> OnPieceTransformed;
     public class EventArgsOnPieceTransformed { public Piece_Data Piece; public int randomMove; };
+
+    //This runs from other script when it is the players turn
+    public void StartTurn()
+    {
+        phaseInTurn = PhaseInTurn.PIECE_SELECTION;
+    }
 
     public enum PhaseInTurn
     {
@@ -50,11 +59,12 @@ public class Piece_Controller : NetworkBehaviour
 
     public PhaseInTurn phaseInTurn { get; private set; }
     // Start is called before the first frame update
+
     void Start()
     {
         if (IsOwner == false) return;
         instance = this;
-        phaseInTurn = PhaseInTurn.PIECE_SELECTION;
+        phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
@@ -208,7 +218,6 @@ public class Piece_Controller : NetworkBehaviour
         }
         else if(coinFlip == DAMAGE)
         {
-            Debug.Log(coinFlip);
             Board_Data.instance.MoveAndDamage(selectedPiece, decidedMove.x, decidedMove.y);
         }
         else
@@ -245,6 +254,10 @@ public class Piece_Controller : NetworkBehaviour
         RemoveHighLightPossibleMoves();
         rerolled = false;
         phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
+        if(OnEndOfTurn == null) { 
+            Debug.LogWarning("No subscribers on this instance for end turn"); 
+        }
+        OnEndOfTurn?.Invoke(this, EventArgs.Empty);
         //TODO: Set turn to next turn
 
     }
