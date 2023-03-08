@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class Input_Controller : MonoBehaviour
 {
     //MULTIPLAYER TODO: Inputs only fire when it is your turn
-
+    //^May not be necassary anymore, still not a bad idea
     public static Input_Controller instance;
     [HideInInspector] public Vector3 mouseWorldPosition;
     [HideInInspector] public Vector2Int mouseBoardPosition;
@@ -34,6 +34,7 @@ public class Input_Controller : MonoBehaviour
     public GameObject contestHolder;
     [SerializeField] Button contestButton;
     [SerializeField] Button declineButton;
+
     public Text contestText;
 
     private void Awake()
@@ -65,11 +66,11 @@ public class Input_Controller : MonoBehaviour
     {
         if (color == Piece_Data.Color.white) {
             GameObject go = Instantiate(whiteRerollButton, whiteButtonHolder.transform);
-            go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
+            //go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
         }
         else {
             GameObject go = Instantiate(blackRerollButton, blackButtonHolder.transform);
-            go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
+            //go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
         }
     }
 
@@ -81,10 +82,6 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedContest()
     {
-        //Check if in the correct phase to register input...
-        if(Piece_Controller.instance.phaseInTurn != Piece_Controller.PhaseInTurn.CONTEST) { return; }
-
-        //TODO: Need check for if player is white or black.
         if (Piece_Controller.instance.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, EventArgs.Empty);
             Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
@@ -97,21 +94,23 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedDecline()
     {
-        if (Piece_Controller.instance.phaseInTurn != Piece_Controller.PhaseInTurn.CONTEST) { return; }
-
         OnDeclineButtonClicked?.Invoke(this, EventArgs.Empty);
+        //Color green after pressed for visual feedback
+        ColorBlock colorBlock = declineButton.colors;
+        colorBlock.normalColor = Color.green;
+        declineButton.colors = colorBlock;
     }
 
     void ButtonPressedEndTurn()
     {
+        if (Piece_Controller.instance.phaseInTurn == Piece_Controller.PhaseInTurn.WAITING_FOR_TURN) return;
+
         OnEndTurnButtonClicked?.Invoke(this, EventArgs.Empty);
     }
 
 
     private void Update()
     {
-
-
         if(developerCommandsEnabled)
         {
             if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }

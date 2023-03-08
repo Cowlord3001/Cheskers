@@ -173,16 +173,19 @@ public class Piece_Controller : NetworkBehaviour
             AdvanceGame();
             return;
         }
+
         coinFlip = UnityEngine.Random.Range(0, 2);  //0 = capture, 1 = damage
 
-        if(Input_Controller.instance.whiteButtonHolder.transform.childCount +
-            Input_Controller.instance.whiteButtonHolder.transform.childCount == 0) {
+        if (Input_Controller.instance.whiteButtonHolder.transform.childCount +
+            Input_Controller.instance.blackButtonHolder.transform.childCount == 0) {
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
             return;
         }
 
+        
         EventArgsOnContestStarted e = new EventArgsOnContestStarted();
+        e.coinFlip = coinFlip;
         OnContestStarted?.Invoke(this, e);
 
         Input_Controller.instance.contestHolder.SetActive(true);
@@ -200,12 +203,6 @@ public class Piece_Controller : NetworkBehaviour
         if (phaseInTurn == PhaseInTurn.CONTEST) {
             //Starts a new contest by advancing gamewithout changing phase
             AdvanceGame();
-        }
-        else {
-            //Refund Token used
-            //TODO: Check who used the token probably should be done in the input controller
-            //Only inputs from player who's turn it is count in future multiplayer.
-            Input_Controller.instance.GiveContestToken(Piece_Data.Color.white);
         }
     }
     void OnDeclinePressed(object sender, EventArgs e)

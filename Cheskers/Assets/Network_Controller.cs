@@ -10,11 +10,9 @@ public class Network_Controller : NetworkBehaviour
     public static Network_Controller instance;
 
     public NetworkVariable<Piece_Data.Color> turnColor;
-    //Need to know players turn. what should track it
-    //Need players multiplayer ID's 
-    int whitePlayerID;
+
+
     bool whitePlayerDeclined = false;
-    int blackPlayerID;
     bool blackPlayerDeclined = false;
 
 
@@ -33,7 +31,7 @@ public class Network_Controller : NetworkBehaviour
 
         //Piece and Board Display Events
         Piece_Display.instance.OnPieceTransformed += OnPieceTransformed;
-        Board_Display.instance.OnValidMovesHighlighted += OnValidMovesHighlighted;
+        Board_Display.instance.OnValidMovesHighlighted += OnHighlightValidMoves;
         Board_Display.instance.OnValidMovesDeHighlighted += OnValidMovesDeHighlighted;
 
         //Calls from changes to pieces
@@ -49,7 +47,7 @@ public class Network_Controller : NetworkBehaviour
         //TODO: Implement EndofTurn event and turns in general for this event
     }
 
-    #region GameNetworkSetUp
+    #region Game Network SetUp
     void OnGameHosted(object sender, EventArgs e)
     {
         //White goes first
@@ -87,7 +85,7 @@ public class Network_Controller : NetworkBehaviour
         blackPlayerDeclined = false;
         whitePlayerDeclined = false;
 
-    }//Detect when declined for each player
+    }
     void OnDeclinedPressed(object sender, EventArgs e)
     {
         Debug.Log("NETWORK_EVENT: DeclinedPressed Detected");
@@ -125,15 +123,53 @@ public class Network_Controller : NetworkBehaviour
             Piece_Display.instance.TransformSelectedPiece(Board_Data.instance.boardPieces[pieceXPos, pieceYpos], chessMoveIndex);
         }
     }
-    void OnValidMovesHighlighted(object sender, Board_Display.EventArgsOnValidMovesHighlighted e)
+    void OnHighlightValidMoves(object sender, Board_Display.EventArgsOnValidMovesHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesHighlighted Detected");
+        if(turnColor.Value == Piece_Controller.instance.color) {
+            HighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.color);
+        }
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    void HighlightValidMovesServerRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
+    {
+        HighlightValidMovesClientRpc(validMoves, colorOfSender);
+    }
+
+    [ClientRpc]
+    void HighlightValidMovesClientRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
+    {
+        Debug.Log("CLIENTRPC: Valid Moves Highlighted");
+        if(Piece_Controller.instance.color != colorOfSender) {
+            List<Vector2Int> validMovesList = new List<Vector2Int>(validMoves);
+            Board_Display.instance.HighLightPossibleMoves(validMovesList);
+        }
+    }
+
     //Removing Highlights from Squares
     void OnValidMovesDeHighlighted(object sender, Board_Display.EventArgsOnValidMovesDeHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesDeHighlighted Detected");
+        if(turnColor.Value == Piece_Controller.instance.color) {
+            RemoveHighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.color);
+        }
 
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void RemoveHighlightValidMovesServerRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
+    {
+        RemoveHighlightValidMovesClientRpc(validMoves, colorOfSender);
+    }
+
+    [ClientRpc]
+    void RemoveHighlightValidMovesClientRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
+    {
+        if(colorOfSender != Piece_Controller.instance.color) {
+            List<Vector2Int> validMovesList = new List<Vector2Int>(validMoves);
+            Board_Display.instance.RemoveHighLightPossibleMoves(validMovesList);
+        }
     }
 
     #endregion
