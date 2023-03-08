@@ -185,21 +185,20 @@ public class Network_Controller : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void EndTurnServerRPC()
     {
+        EndTurnClientRPC(turnColor.Value);
         if (turnColor.Value == Piece_Data.Color.white) {
             turnColor.Value = Piece_Data.Color.black;
         }
         else {
             turnColor.Value = Piece_Data.Color.white;
         }
-        EndTurnClientRPC();
-
     }
     [ClientRpc]
-    void EndTurnClientRPC()
+    void EndTurnClientRPC(Piece_Data.Color colorWhosTurnIsEnding)
     {
         Debug.Log("CLIENT RPC: End Turn");
         //This is called on all clients. 
-        if (turnColor.Value == Piece_Data.Color.white) {
+        if (colorWhosTurnIsEnding == Piece_Data.Color.white) {
             if (Piece_Controller.instance.color == Piece_Data.Color.black) {
                 //Start turn
                 Piece_Controller.instance.StartTurn();

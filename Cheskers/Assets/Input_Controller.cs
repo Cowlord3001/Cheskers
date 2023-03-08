@@ -103,7 +103,11 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedEndTurn()
     {
-        if (Piece_Controller.instance.phaseInTurn == Piece_Controller.PhaseInTurn.WAITING_FOR_TURN) return;
+        Debug.Log(Piece_Controller.instance.phaseInTurn);
+        if (Piece_Controller.instance.phaseInTurn == Piece_Controller.PhaseInTurn.WAITING_FOR_TURN) 
+        { 
+            return; 
+        }
 
         OnEndTurnButtonClicked?.Invoke(this, EventArgs.Empty);
     }

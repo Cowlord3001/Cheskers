@@ -42,6 +42,11 @@ public class Piece_Controller : NetworkBehaviour
     public event EventHandler<EventArgsOnContestStarted> OnContestStarted;
     public class EventArgsOnContestStarted { public int coinFlip; }
 
+    private void Update()
+    {
+
+    }
+
     //This runs from other script when it is the players turn
     public void StartTurn()
     {
