@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,9 +13,12 @@ public class Network_Controller : NetworkBehaviour
     public NetworkVariable<Piece_Data.Color> turnColor;
 
 
-    bool whitePlayerDeclined = false;
-    bool blackPlayerDeclined = false;
+    NetworkVariable<bool> whitePlayerDeclined;
+    NetworkVariable<bool> blackPlayerDeclined;
 
+    //Contest Variables
+    const int CAPTURE = 0;
+    const int DAMAGE = 1;
 
     private void Awake()
     {
@@ -25,6 +29,11 @@ public class Network_Controller : NetworkBehaviour
     {
         NetworkVariable<Piece_Data.Color> turnColor =
             new NetworkVariable<Piece_Data.Color>(Piece_Data.Color.white);
+        whitePlayerDeclined = new NetworkVariable<bool>();
+        whitePlayerDeclined.Value = false;
+        blackPlayerDeclined = new NetworkVariable<bool>();
+        blackPlayerDeclined.Value = false;
+
         //Detecting Game being hosted and clinet joining
         Multiplater_UI.OnGameHosted += OnGameHosted;
         Multiplater_UI.OnGameClientJoined += OnGameClientJoined;
@@ -79,28 +88,114 @@ public class Network_Controller : NetworkBehaviour
     #region Contest
     //Need event for contest starting so we can popup window for both players
     //Then Need an event for listening for input from either players
-    void OnContestStarting(object sender, Piece_Controller.EventArgsOnContestStarted e)
+    void OnContestStarting(object sender, EventArgs e)
     {
         Debug.Log("NETWORK_EVENT: Contest Event Detected");
-        blackPlayerDeclined = false;
-        whitePlayerDeclined = false;
-
+        //blackPlayerDeclined = false;
+        //whitePlayerDeclined = false;
+        NewContestServerRPC();
     }
-    void OnDeclinedPressed(object sender, EventArgs e)
-    {
-        Debug.Log("NETWORK_EVENT: DeclinedPressed Detected");
 
+    [ServerRpc(RequireOwnership = false)]
+    void NewContestServerRPC()
+    {
+        int coinFlip = UnityEngine.Random.Range(0, 2);
+        NewContestClientRPC(coinFlip);
+    }
+
+    [ClientRpc]
+    void NewContestClientRPC(int coinFlip)
+    {
+        Debug.Log("CLIENTRPC: New Contest Started");
+        UpdateDisplayBasedOnCoinFlip(coinFlip);
     }
     //Someone decides to reroll
-    void OnContestButtonPressed(object sender, EventArgs e)
+    void OnContestButtonPressed(object sender, Input_Controller.EventArgsOnContestButtonClicked e)
     {
         Debug.Log("NETWORK_EVENT: ContestButtonPressed Detected");
 
+        ContestedServerRPC(e.colorOfPresser);
     }
+
+    [ServerRpc(RequireOwnership = false)]
+    void ContestedServerRPC(Piece_Data.Color colorOfSender)
+    {
+        int coinFlip = UnityEngine.Random.Range(0, 2);
+        ContestedClientRPC(coinFlip, colorOfSender);
+    }
+
+    [ClientRpc]
+    void ContestedClientRPC(int coinFlip, Piece_Data.Color colorOfSender)
+    {
+        Debug.Log("CLIENTRPC: New Contest Started");
+
+        if(colorOfSender == Piece_Data.Color.white) {
+            Destroy( Input_Controller.instance.whiteButtonHolder.transform.GetChild(0).gameObject);
+        }
+        else {
+            Destroy( Input_Controller.instance.blackButtonHolder.transform.GetChild(0).gameObject);
+        }
+        UpdateDisplayBasedOnCoinFlip(coinFlip);
+
+        //Check if contest should end
+        if( Input_Controller.instance.whiteButtonHolder.transform.childCount +
+            Input_Controller.instance.blackButtonHolder.transform.childCount == 0){
+            //Simulate both pressing decline button
+            //TODO: Children not adding up correctly so this doesnt run
+            DeclinePressedServerRpc(Piece_Controller.instance.color);
+        }
+    }
+
+
+    void UpdateDisplayBasedOnCoinFlip(int coinFlip) 
+    {
+
+        Input_Controller.instance.contestHolder.SetActive(true);
+        if (coinFlip == CAPTURE) {
+            Input_Controller.instance.contestText.text = "Piece Capture";
+        }
+        else {
+            Input_Controller.instance.contestText.text = "Piece Damage";
+        }
+
+    }
+
+    void OnDeclinedPressed(object sender, EventArgs e)
+    {
+        Debug.Log("NETWORK_EVENT: DeclinedPressed Detected");
+        DeclinePressedServerRpc(Piece_Controller.instance.color);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    void DeclinePressedServerRpc(Piece_Data.Color colorOfSender)
+    {
+        Debug.Log("CLIENTRPC: Decline presserd by " + colorOfSender);
+        if (colorOfSender == Piece_Data.Color.white) {
+            whitePlayerDeclined.Value = true;
+        }
+        if(colorOfSender == Piece_Data.Color.black) {
+            blackPlayerDeclined.Value = true;
+        }
+
+        if(whitePlayerDeclined.Value && blackPlayerDeclined.Value) {
+            //EndContest
+            whitePlayerDeclined.Value = false;
+            blackPlayerDeclined.Value = false;
+            EndContestClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    void EndContestClientRpc()
+    {
+        //Piece_Controller.instance
+        Piece_Controller.instance.EndContest();
+    }
+
     #endregion
 
     #region GraphicsUpdates
-    //Transforming Pieces and Highlighted Squares
+        //Transforming Pieces and Highlighted Squares
     void OnPieceTransformed(object sender, Piece_Display.EventArgsOnPieceTransformed e)
     {
         Debug.Log("NETWORK_EVENT: TransformedEvent Detected");
@@ -299,4 +394,5 @@ public class Network_Controller : NetworkBehaviour
 
     #endregion
 }
+
 

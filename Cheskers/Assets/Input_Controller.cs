@@ -17,7 +17,12 @@ public class Input_Controller : MonoBehaviour
     public event EventHandler OnRollAgainButtonClicked;
     public event EventHandler OnEndTurnButtonClicked;
 
-    public event EventHandler OnContestButtonClicked;
+    public event EventHandler<EventArgsOnContestButtonClicked> OnContestButtonClicked;
+    public class EventArgsOnContestButtonClicked : EventArgs
+    {
+        public Piece_Data.Color colorOfPresser;
+    }
+
     public event EventHandler OnDeclineButtonClicked;
 
     [SerializeField] Button endTurn;
@@ -82,23 +87,24 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedContest()
     {
+        EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
+        e.colorOfPresser = Piece_Controller.instance.color;
         if (Piece_Controller.instance.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
-            OnContestButtonClicked?.Invoke(this, EventArgs.Empty);
-            Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
+            OnContestButtonClicked?.Invoke(this, e);
         }
         else if (Piece_Controller.instance.color == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
-            OnContestButtonClicked?.Invoke(this, EventArgs.Empty);
-            Destroy(blackButtonHolder.transform.GetChild(0).gameObject);
+            OnContestButtonClicked?.Invoke(this, e);
         }
     }
 
     void ButtonPressedDecline()
     {
-        OnDeclineButtonClicked?.Invoke(this, EventArgs.Empty);
         //Color green after pressed for visual feedback
         ColorBlock colorBlock = declineButton.colors;
-        colorBlock.normalColor = Color.green;
+        colorBlock.selectedColor = Color.green;
         declineButton.colors = colorBlock;
+
+        OnDeclineButtonClicked?.Invoke(this, EventArgs.Empty);
     }
 
     void ButtonPressedEndTurn()
@@ -118,7 +124,7 @@ public class Input_Controller : MonoBehaviour
         if(developerCommandsEnabled)
         {
             if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }
-            if(Input.GetKeyDown(KeyCode.T)) { Instantiate(whiteRerollButton, whiteButtonHolder.transform); }
+            if (Input.GetKeyDown(KeyCode.T)) { Instantiate(whiteRerollButton, whiteButtonHolder.transform); }
         }
 
         //Temporary till hosting scene is seperate.

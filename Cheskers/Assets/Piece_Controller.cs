@@ -15,7 +15,6 @@ public class Piece_Controller : NetworkBehaviour
     List<Vector2Int> validMoves;
     Vector2Int decidedMove;
     bool rerolled = false;
-    int coinFlip;
 
     //PUBLIC DATA
     public static Piece_Controller instance;
@@ -33,14 +32,13 @@ public class Piece_Controller : NetworkBehaviour
     }
     public PhaseInTurn phaseInTurn { get; private set; }
 
-    //CONSTANTS
+    //Contest Variables
     const int CAPTURE = 0;
     const int DAMAGE = 1;
 
     //EVENTS
     public event EventHandler OnEndOfTurn;
-    public event EventHandler<EventArgsOnContestStarted> OnContestStarted;
-    public class EventArgsOnContestStarted { public int coinFlip; }
+    public event EventHandler OnContestStarted;
 
     private void Update()
     {
@@ -63,8 +61,8 @@ public class Piece_Controller : NetworkBehaviour
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
-        Input_Controller.instance.OnContestButtonClicked += OnContestPressed;
-        Input_Controller.instance.OnDeclineButtonClicked += OnDeclinePressed;
+        //Input_Controller.instance.OnContestButtonClicked += OnContestPressed;
+        //Input_Controller.instance.OnDeclineButtonClicked += OnDeclinePressed;
     }
 
     //Event only fires on mouseclicks on the board
@@ -97,7 +95,9 @@ public class Piece_Controller : NetworkBehaviour
                 break;
             case PhaseInTurn.MOVE_AND_UPDATE:
                 Debug.Log("MOVE_AND_UPDATE");
-                MovePiece();        // DONE
+                //If this is being called from here it is
+                //local and no contest was needed
+                MovePiece(UnityEngine.Random.Range(0, 2));        // DONE
                 break;
             case PhaseInTurn.END_OF_TURN:
                 Debug.Log("END_OF_TURN");
@@ -179,8 +179,6 @@ public class Piece_Controller : NetworkBehaviour
             return;
         }
 
-        coinFlip = UnityEngine.Random.Range(0, 2);  //0 = capture, 1 = damage
-
         if (Input_Controller.instance.whiteButtonHolder.transform.childCount +
             Input_Controller.instance.blackButtonHolder.transform.childCount == 0) {
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
@@ -188,42 +186,24 @@ public class Piece_Controller : NetworkBehaviour
             return;
         }
 
-        
-        EventArgsOnContestStarted e = new EventArgsOnContestStarted();
-        e.coinFlip = coinFlip;
-        OnContestStarted?.Invoke(this, e);
+        OnContestStarted?.Invoke(this, EventArgs.Empty);
+        //Contest code moved to network controller
 
-        Input_Controller.instance.contestHolder.SetActive(true);
-        if (coinFlip == CAPTURE)
-        {
-            Input_Controller.instance.contestText.text = "Piece Capture";
-        }
-        else
-        {
-            Input_Controller.instance.contestText.text = "Piece Damage";
-        }
     }
-    void OnContestPressed(object sender, EventArgs e)
+    //Server may have to end contest, public
+    public void EndContest()
     {
+        //Called by network controller to progress the game.
+        Input_Controller.instance.contestHolder.SetActive(false);
         if (phaseInTurn == PhaseInTurn.CONTEST) {
-            //Starts a new contest by advancing gamewithout changing phase
+            phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
         }
     }
-    void OnDeclinePressed(object sender, EventArgs e)
+    //Server may have to move piece based on contest,  public
+    public void MovePiece(int coinFlip)
     {
-        EndContest();
-    }
-    void EndContest()
-    {
-        //TODO: Call if time runs out
-        Input_Controller.instance.contestHolder.SetActive(false);
-        phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
-        AdvanceGame();
-    }
-    void MovePiece()
-    {
-        if(coinFlip == CAPTURE)
+        if (coinFlip == CAPTURE)
         {
             Board_Data.instance.MoveAndTake(selectedPiece, decidedMove.x, decidedMove.y);
         }
