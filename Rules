@@ -26,4 +26,33 @@ These pieces are arranged in the two rows closest to their respective players.
 > Chance Time: If a VIP is damaged but not captured, both VIPs are revealed and the game enters *Chance Time*.
   Roll 1d20 to decide what random effect is applied to the board.
   
-  TO BE ADDED...
+1. Sudden Death: All pieces are cleared off the board, except the VIPs.
+2. Teleportation Accident: A player’s VIP randomly swaps places with another piece at the start of their turn round.
+    This is not limited to the current player’s pieces.
+3. Conformity: The player whose VIP was damaged rolls a d6. This decides the behavior of all pieces for the remainder of the game.
+4. Foreign Exchange: The VIPs immediately switch places.
+5. Thorns II: Whenever a piece is attacked, the attacker is damaged.
+6. Duel: Coin flips are now changed to games of Rock, Paper, Scissors between players.
+7. Chesker Revolution: All pieces on the board are evenly-distributed between players and placed back on the board, starting from the back-left row.
+    All pieces in players’ hands are evenly-distributed as well. If a piece cannot be evenly-distributed, it is destroyed.
+8. Structural Failure: All damaged pieces (besides the VIP) are destroyed, and all undamaged pieces are considered damaged.
+9. Necromancy: All pieces in the players’ hands are converted to their color and placed back on the board, starting from the back-left row.
+10. Defectors: At the start of each turn, one of the player’s pieces randomly changes to the opposing player’s color (this cannot affect a VIP).
+11. Spontaneous Combustion: At the start of each turn, the player must choose one of their pieces to take damage.
+     The opposing player can expend a piece from their hand to make them choose a different piece (this can only happen once per turn).
+12. Chess Rules!: Roll a d6 for each of your pieces. This decides their behavior for the remainder of the game.
+13. Checkers Rules!: Flip a coin: heads = black, tails = white. Move each of your pieces to the nearest square of this color (player’s choice).
+     All pieces act like ordinary checkers pieces for the remainder of the game.
+14. Everything Rules!: Roll a d6 for each of your pieces. This decides their behavior for the remainder of the game.
+     Flip a coin: heads = black, tails = white. If a piece is currently on a square of this color, you can instead move it like a checkers piece.
+15. Pitfall: Some spaces are now pitfalls. Roll 1d4 and consult the table below to decide their arrangement (red = pitfall).
+     Only a knight can cross a pitfall, and any pieces present on a pitfall when it appears is damaged and moved to the nearest available space (player’s choice).
+     [Images to be added]
+16. Supersize Me: The VIPs are enlarged to be 2x2 pieces, “pushing” any pieces in their space (player’s choice on which directions they expand).
+     Each VIP has 4 health (or 2 if previously damaged), can attack up to 4 pieces in one move, and turn back to 1x1 pieces if they collide with the other VIP.
+17. Completionist: All the opponent’s pieces must be eliminated to win. The VIP is no longer the target.
+18. Gun?: The VIPs now wield guns, allowing them to attack any piece within line of sight (I.e. the first piece in each of the 4 cardinal directions).
+     They do not travel to this piece.
+19. Recursion: The game restarts, with the board reduced to 6x6 and the number of pieces to 12 each.
+     If this occurs again, the board is reduced to 4x4 and the number of pieces to 8 each. If this occurs a third time, God is dead and Cheskers killed him.
+20. Cataclysm: At the start of each round, a different Chance Time event is rolled. This is overridden (if possible) at the start of the next round.
