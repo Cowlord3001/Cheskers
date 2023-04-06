@@ -60,19 +60,20 @@ public class Piece_Display : MonoBehaviour
                 if (Board_Data.instance.boardPieces[x, y] != null) {
                     GameObject go = Board_Data.instance.boardPieces[x, y].gameObject;
                     go.transform.position = Piece_Detection.BoardIndextoWorld(x, y);
-                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(Board_Data.instance.boardPieces[x, y].GetColor(), Board_Data.instance.boardPieces[x, y].IsDamaged);
+                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(Board_Data.instance.boardPieces[x, y].GetColor(), Board_Data.instance.boardPieces[x, y].health);
                 }
             }
         }
     }
-    Sprite GetDefaultSprite(Piece_Data.Color color, bool isDamaged)
+    Sprite GetDefaultSprite(Piece_Data.Color color, int health)
     {
+        //TODO: Health could be bigger than 2 in the future
         switch (color) {
             case Piece_Data.Color.white:
-                if (isDamaged) return whiteDamagedSprite;
+                if (health == 1) return whiteDamagedSprite;
                 else return whiteSprite;
             case Piece_Data.Color.black:
-                if (isDamaged) return blackDamagedSprite;
+                if (health == 1) return blackDamagedSprite;
                 else return blackSprite;
             default:
                 return null;
@@ -83,7 +84,7 @@ public class Piece_Display : MonoBehaviour
         Chess_Move_SO chessMove = chessMoves[chessMoveIndex];
 
         selectedPiece.gameObject.GetComponent<SpriteRenderer>().sprite =
-                chessMove.GetSprite(selectedPiece.GetColor(), selectedPiece.IsDamaged);
+                chessMove.GetPieceSprite(selectedPiece.GetColor(), selectedPiece.health);
 
         EventArgsOnPieceTransformed e = new EventArgsOnPieceTransformed();
         e.Piece = selectedPiece;

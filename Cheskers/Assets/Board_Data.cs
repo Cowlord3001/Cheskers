@@ -184,7 +184,7 @@ public class Board_Data
             MovePiece(piece, newXPos, newYPos);
             return;
         }
-        if(boardPieces[newXPos, newYPos].IsDamaged == true) {
+        if(boardPieces[newXPos, newYPos].health == 1) {
             MoveAndTake(piece, newXPos, newYPos);
             return;
         }
@@ -220,7 +220,8 @@ public class Board_Data
 
     public void DamagePiece(int pieceToDamagePositionX, int pieceToDamagePositionY)
     {
-        boardPieces[pieceToDamagePositionX, pieceToDamagePositionY].IsDamaged = true;
+        boardPieces[pieceToDamagePositionX, pieceToDamagePositionY].health--;
+        //TODO: check for death maybe?
         EventArgsPieceDamaged e = new EventArgsPieceDamaged();
         e.damagedPiece = boardPieces[pieceToDamagePositionX, pieceToDamagePositionY];
         OnPieceDamaged(this, e);

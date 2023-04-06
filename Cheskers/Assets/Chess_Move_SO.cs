@@ -15,14 +15,16 @@ public class Chess_Move_SO : ScriptableObject
     public Move[] moves;
     public SlidingMove[] slidingMoves;
 
-    public Sprite GetSprite(Piece_Data.Color color, bool isDamaged)
+    
+    public Sprite GetPieceSprite(Piece_Data.Color color, int health)
     {
+        //Might be copied and pasted need to consolidate
         switch (color) {
             case Piece_Data.Color.white:
-                if (isDamaged) return spriteWhiteDamaged;
+                if (health == 1) return spriteWhiteDamaged;
                 else return spriteWhiteNoDamage;
             case Piece_Data.Color.black:
-                if (isDamaged) return spriteBlackDamaged;
+                if (health == 1) return spriteBlackDamaged;
                 else return spriteBlackNoDamage;
             default:
                 return null;

@@ -171,7 +171,7 @@ public class Piece_Controller : NetworkBehaviour
     void Contest()
     {
         if (Board_Data.instance.boardPieces[decidedMove.x,decidedMove.y] == null ||
-            Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].IsDamaged == true)
+            Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].health == 1)
         {
             //Skip Contest Phase
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;

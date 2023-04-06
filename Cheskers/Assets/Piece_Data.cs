@@ -12,7 +12,7 @@ public class  Piece_Data
     Color color;
     
     bool IsVIP;//Not Used Yet
-    public bool IsDamaged;
+    public int health;
     public bool hasMoved;
     public Color GetColor()
     {
@@ -24,6 +24,6 @@ public class  Piece_Data
         this.positionOnBoard = positionOnBoard;
         this.color = color;
         IsVIP = false;
-        IsDamaged = false;
+        health = 2;
     }
 }

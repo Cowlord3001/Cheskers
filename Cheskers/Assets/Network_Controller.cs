@@ -12,7 +12,7 @@ public class Network_Controller : NetworkBehaviour
 
     public NetworkVariable<Piece_Data.Color> turnColor;
 
-
+    
     NetworkVariable<bool> whitePlayerDeclined;
     NetworkVariable<bool> blackPlayerDeclined;
 
@@ -149,7 +149,6 @@ public class Network_Controller : NetworkBehaviour
 
     void UpdateDisplayBasedOnCoinFlip(int coinFlip) 
     {
-
         Input_Controller.instance.contestHolder.SetActive(true);
         if (coinFlip == CAPTURE) {
             Input_Controller.instance.contestText.text = "Piece Capture";
