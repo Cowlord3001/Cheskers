@@ -27,7 +27,7 @@ These pieces are arranged in the two rows closest to their respective players.
   Roll 1d20 to decide what random effect is applied to the board.
   
 1. Sudden Death: All pieces are cleared off the board, except the VIPs.
-2. Teleportation Accident: A player’s VIP randomly swaps places with another piece at the start of their turn round.
+2. Teleportation Accident: A player’s VIP randomly swaps places with another piece at the start of their turn.
     This is not limited to the current player’s pieces.
 3. Conformity: The player whose VIP was damaged rolls a d6. This decides the behavior of all pieces for the remainder of the game.
 4. Foreign Exchange: The VIPs immediately switch places.
