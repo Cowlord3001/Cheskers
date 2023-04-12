@@ -386,7 +386,7 @@ public class Network_Controller : NetworkBehaviour
         Debug.Log("CLIENTRPC: Piece Moved Detected");
         if (Piece_Controller.instance.color != colorCallingTheUpdate) {
             //if it is not your turn you need to be updated of your oponents move
-            Board_Data.instance.MovePieceExternal(oldXPos, oldYPos, newXPos, newYPos);
+            Board_Data.instance.MovePieceNetworkCall(oldXPos, oldYPos, newXPos, newYPos);
         }
         Piece_Display.instance.UpdatePieces();
     }

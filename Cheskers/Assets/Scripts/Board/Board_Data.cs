@@ -240,7 +240,7 @@ public class Board_Data
 
     }
 
-    public void MovePieceExternal(int oldXPos, int oldYPos, int newXPos, int newYPos)
+    public void MovePieceNetworkCall(int oldXPos, int oldYPos, int newXPos, int newYPos)
     {
         if(boardPieces[oldXPos, oldYPos] == null) { return; }
 

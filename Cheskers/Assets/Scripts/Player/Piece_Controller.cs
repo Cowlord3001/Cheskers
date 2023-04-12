@@ -24,12 +24,13 @@ public class Piece_Controller : NetworkBehaviour
     {
         PIECE_SELECTION,
         PIECE_CONFIRMATION,
-        DECIDE_MOVE_OR_REROLL,//TODO: OnlyReroll Once(AfterDebugging done on movesets)
-        CONTEST,//TODO: Add a reroll option that uses resources(dont exist yet)
+        DECIDE_MOVE_OR_REROLL,
+        CONTEST,
         MOVE_AND_UPDATE,
-        END_OF_TURN, // Piece movement should only be finalized here after options to reroll given
+        END_OF_TURN,
         WAITING_FOR_TURN
     }
+    //Used by inputcontroller, maybe find a better solution
     public PhaseInTurn phaseInTurn { get; private set; }
 
     //Contest Variables

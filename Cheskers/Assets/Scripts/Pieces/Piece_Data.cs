@@ -11,7 +11,7 @@ public class  Piece_Data
     public enum Color { white, black };
     Color color;
     
-    bool IsVIP;//Not Used Yet
+    public bool IsVIP;//Not Used Yet
     public int health;
     public bool hasMoved;
     public Color GetColor()
