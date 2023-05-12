@@ -146,7 +146,6 @@ public class Network_Controller : NetworkBehaviour
         }
     }
 
-
     void UpdateDisplayBasedOnCoinFlip(int coinFlip) 
     {
         Input_Controller.instance.contestHolder.SetActive(true);

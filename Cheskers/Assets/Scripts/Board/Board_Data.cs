@@ -9,6 +9,9 @@ public class Board_Data
     public static Board_Data instance;
 
     public string debugMessage;
+    /// <summary>
+    /// This is a 2 dimensional array of the contents of all positions on the board
+    /// </summary>
     public Piece_Data[,] boardPieces { get; private set; }
     public int size { get; private set; }
 
@@ -116,32 +119,32 @@ public class Board_Data
         //Sliding Move
         foreach(SlidingMove move in chessMoves.slidingMoves) {
             int moveValidateResult;
-            int x = piece.positionOnBoard.x;
+            int startX = piece.positionOnBoard.x;
             int endX = piece.positionOnBoard.x + move.changeInX;
-            int y = piece.positionOnBoard.y;
+            int startY = piece.positionOnBoard.y;
             int endY = piece.positionOnBoard.x + move.changeInY;
-            while (x != endX || y != endY) {
+            while (startX != endX || startY != endY) {
                 //Normalize move to -1 or 1
                 //Could probably just use -1 and 1 in the slidingmove rules
                 //However what if some effect causes half movement???
                 if(Mathf.Abs(move.changeInX) > 0)
-                    x += move.changeInX/Mathf.Abs(move.changeInX); 
+                    startX += move.changeInX/Mathf.Abs(move.changeInX); //adding 1/-1
                 if(Mathf.Abs(move.changeInY) > 0)
-                    y += move.changeInY/Mathf.Abs(move.changeInY);
+                    startY += move.changeInY/Mathf.Abs(move.changeInY); //adding 1/-1
 
                 //Validate position
-                moveValidateResult = ValidMove(piece.GetColor(), x, y);
+                moveValidateResult = ValidMove(piece.GetColor(), startX, startY);
 
                 //If move is not illegal
                 if (moveValidateResult == MOVING_TO_EMPTY) {
-                    legalMoves.Add(new Vector2Int(x, y));
+                    legalMoves.Add(new Vector2Int(startX, startY));
                 }
                 else if(moveValidateResult == MOVING_TO_ENEMYPIECE) {
                     //Movement Stops if you reach an enemy but move is still added
-                    legalMoves.Add(new Vector2Int(x, y));
+                    legalMoves.Add(new Vector2Int(startX, startY));
                     break;
                 }
-                else {
+                else if(moveValidateResult == MOVING_TO_ILLIGAL_SPACE){
                     //One illegal move stops the rest of the slide.
                     break;
                 }
@@ -158,15 +161,18 @@ public class Board_Data
         if(piece.hasMoved == false) {
             int newXpos = piece.positionOnBoard.x;
             int newYpos;
+            int moveValidateResult1;
+            int moveValidateResult2;
             if (piece.GetColor() == Piece_Data.Color.white) {
                 newYpos = piece.positionOnBoard.y + 2;
+                moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
+                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos + 1);
             }
             else {
                 newYpos = piece.positionOnBoard.y - 2;
+                moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
+                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos - 1);
             }
-
-            int moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
-            int moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos - 1);
 
             if (moveValidateResult1 == MOVING_TO_EMPTY && moveValidateResult2 == MOVING_TO_EMPTY) {
                 ExtraMoves.Add(new Vector2Int(newXpos, newYpos));
@@ -188,7 +194,6 @@ public class Board_Data
             MoveAndTake(piece, newXPos, newYPos);
             return;
         }
-
         if(piece.type == Piece_Data.Type.knight ||
            piece.type == Piece_Data.Type.pawn   ||
            piece.type == Piece_Data.Type.king) {
