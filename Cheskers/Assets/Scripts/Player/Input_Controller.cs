@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,12 +19,14 @@ public class Input_Controller : MonoBehaviour
     public event EventHandler OnEndTurnButtonClicked;
 
     public event EventHandler<EventArgsOnContestButtonClicked> OnContestButtonClicked;
+    public event EventHandler<EventArgsOnContestButtonClicked> OnContestButton2Clicked;
     public class EventArgsOnContestButtonClicked : EventArgs
     {
         public Piece_Data.Color colorOfPresser;
     }
 
     public event EventHandler OnDeclineButtonClicked;
+    public event EventHandler OnDeclineButton2Clicked;
 
     [SerializeField] Button endTurn;
     [SerializeField] Button rerollPieceButton;
@@ -36,25 +39,38 @@ public class Input_Controller : MonoBehaviour
     [SerializeField] GameObject blackRerollButton;
 
     [Header("ContestSettings")]
-    public GameObject contestHolder;
+    [SerializeField] GameObject contestHolder;
     [SerializeField] Button contestButton;
     [SerializeField] Button declineButton;
+    [SerializeField] GameObject contest2Holder;
+    [SerializeField] Button contest2Button;
+    [SerializeField] Button decline2Button;
 
-    public Text contestText;
+    [SerializeField] Text contestText;
+    [SerializeField] Text contest2Text;
 
     private void Awake()
     {
         instance = this;
-        rerollPieceButton.onClick.AddListener(() => ButtonPressedReroll());
-        endTurn.onClick.AddListener(() => ButtonPressedEndTurn());
-        contestButton.onClick.AddListener(() => ButtonPressedContest());
-        declineButton.onClick.AddListener(() => ButtonPressedDecline());
+
     }
 
     private void Start()
     {
         Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemovedFromBoardListener;
         contestHolder.SetActive(false);
+        contest2Holder.SetActive(false);
+
+        rerollPieceButton.onClick.AddListener(() => ButtonPressedReroll());
+        endTurn.onClick.AddListener(() => ButtonPressedEndTurn());
+
+        contestButton.onClick.AddListener(() => ButtonPressedContest());
+        declineButton.onClick.AddListener(() => ButtonPressedDecline());
+        if (Network_Controller.instance.isMultiplayerGame == true) { return; }
+
+        Debug.Log("Setting up second contest buttons");
+        contest2Button.onClick.AddListener(() => Button2PressedContest());
+        decline2Button.onClick.AddListener(() => Button2PressedDecline());
     }
 
     void OnPieceRemovedFromBoardListener(object sender, Board_Data.EventArgsPieceRemoved e)
@@ -89,22 +105,59 @@ public class Input_Controller : MonoBehaviour
     {
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
         e.colorOfPresser = Piece_Controller.instance.color;
-        if (Piece_Controller.instance.color == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
+        if (Network_Controller.instance.isMultiplayerGame == true) { 
+            e.colorOfPresser = Piece_Data.Color.white; 
+        }
+
+        if (e.colorOfPresser == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, e);
         }
-        else if (Piece_Controller.instance.color == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
+        else if (e.colorOfPresser == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
             OnContestButtonClicked?.Invoke(this, e);
         }
     }
-
-    void ButtonPressedDecline()
+    public void ButtonPressedDecline()
     {
         //Color green after pressed for visual feedback
         ColorBlock colorBlock = declineButton.colors;
-        colorBlock.selectedColor = Color.green;
+        colorBlock.normalColor = Color.green;
         declineButton.colors = colorBlock;
 
         OnDeclineButtonClicked?.Invoke(this, EventArgs.Empty);
+    }
+    //SinglePlayer
+    void Button2PressedContest()
+    {
+        EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
+        e.colorOfPresser = Piece_Data.Color.black;
+
+        if (e.colorOfPresser == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
+            OnContestButton2Clicked?.Invoke(this, e);
+        }
+        else if (e.colorOfPresser == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
+            OnContestButton2Clicked?.Invoke(this, e);
+        }
+    }
+    public void Button2PressedDecline()
+    {
+        Debug.Log("Decline Button 2 Pressed Input");
+        //Color green after pressed for visual feedback
+        ColorBlock colorBlock = decline2Button.colors;
+        colorBlock.normalColor = Color.green;
+
+        OnDeclineButton2Clicked?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ResetDeclineButtons()
+    {
+        ColorBlock colorBlock = declineButton.colors;
+        colorBlock.normalColor = Color.white;
+        declineButton.colors = colorBlock;
+
+        colorBlock = decline2Button.colors;
+        colorBlock.normalColor = Color.white;
+        decline2Button.colors = colorBlock;
+
     }
 
     void ButtonPressedEndTurn()
@@ -143,6 +196,35 @@ public class Input_Controller : MonoBehaviour
             //Send left click to listeners
             OnLeftMouseClick?.Invoke(this, EventArgs.Empty);
         }
+    }
+
+    const int CAPTURE = 0;
+    const int DAMAGE = 1;
+    public void UpdateDisplayBasedOnCoinFlip(int coinFlip)
+    {
+        contestHolder.SetActive(true);
+        
+        if (coinFlip == CAPTURE) {
+            contestText.text = "Piece Capture";
+        }
+        else {
+            contestText.text = "Piece Damage";
+        }
+        if (Network_Controller.instance.isMultiplayerGame == true) { return; }
+
+        contest2Holder.SetActive(true);
+        if (coinFlip == CAPTURE) {
+            contest2Text.text = "Piece Capture";
+        }
+        else {
+            contest2Text.text = "Piece Damage";
+        }
+
+    }
+    public void TurnOffContestHolders()
+    {
+        contestHolder.SetActive(false);
+        contest2Holder.SetActive(false);
     }
 
 }

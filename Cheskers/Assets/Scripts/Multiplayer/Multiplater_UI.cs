@@ -13,19 +13,31 @@ public class Multiplater_UI : MonoBehaviour
     public static event EventHandler OnGameHosted;
     public static event EventHandler OnGameClientJoined;
 
+    [SerializeField] GameObject playerPrefab;
+
+
     // Start is called before the first frame update
     void Start()
     {
-        hostButton.onClick.AddListener(() => {
-            GetComponent<NetworkManager>().StartHost();
-            Invoke("GameHosted", 1f);
+        if (Network_Controller.instance.isMultiplayerGame == true) {
+            hostButton.onClick.AddListener(() =>
+            {
+                GetComponent<NetworkManager>().StartHost();
+                Invoke("GameHosted", 1f);
             }
-            ) ;
-        clientButton.onClick.AddListener(() => {
-            GetComponent<NetworkManager>().StartClient();
-            Invoke("ClinetJoined", 1f);
+                );
+            clientButton.onClick.AddListener(() =>
+            {
+                GetComponent<NetworkManager>().StartClient();
+                Invoke("ClinetJoined", 1f);
+            }
+                );
         }
-            );
+        else {
+            hostButton.gameObject.SetActive(false);
+            clientButton.gameObject.SetActive(false);
+            Instantiate(playerPrefab);
+        }
     }
 
     void GameHosted()

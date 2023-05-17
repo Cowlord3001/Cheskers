@@ -40,7 +40,7 @@ public class Piece_Controller : NetworkBehaviour
     //EVENTS
     public event EventHandler OnEndOfTurn;
     public event EventHandler OnContestStarted;
-
+    int coinFlip;
     private void Update()
     {
 
@@ -52,13 +52,23 @@ public class Piece_Controller : NetworkBehaviour
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
     }
 
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        instance = this;
+    }
 
+    // Start is called before the first frame update
     void Start()
     {
-        if (IsOwner == false) return;
-        instance = this;
-        phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
+        if (Network_Controller.instance.isMultiplayerGame == true) {
+            if (IsOwner == false) return;
+            phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
+        }
+        else {
+            //Not Multiplayer
+            color = Piece_Data.Color.white;
+            phaseInTurn = PhaseInTurn.PIECE_SELECTION;
+        }
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
@@ -69,14 +79,18 @@ public class Piece_Controller : NetworkBehaviour
     //Event only fires on mouseclicks on the board
     void OnLeftMouseClick(object sender, EventArgs e)
     {
-        if (IsOwner == false) return;
-        if (Network_Controller.instance.turnColor.Value != color) { return; }
+        if (Network_Controller.instance.isMultiplayerGame == true) {
+            if (IsOwner == false) return;
+            if (Network_Controller.instance.turnColor.Value != color) { return; }
+        }
         AdvanceGame(true);
     }
     void AdvanceGame(bool mouseClicked = false)
     {
-        if (IsOwner == false) return;
-        if (Network_Controller.instance.turnColor.Value != color) { return; }
+        if (Network_Controller.instance.isMultiplayerGame == true) {
+            if (IsOwner == false) return;
+            if (Network_Controller.instance.turnColor.Value != color) { return; }
+        }
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
                 Debug.Log("PIECE_SELECTION");
@@ -98,7 +112,7 @@ public class Piece_Controller : NetworkBehaviour
                 Debug.Log("MOVE_AND_UPDATE");
                 //If this is being called from here it is
                 //local and no contest was needed
-                MovePiece(UnityEngine.Random.Range(0, 2));        // DONE
+                MovePiece();        // DONE
                 break;
             case PhaseInTurn.END_OF_TURN:
                 Debug.Log("END_OF_TURN");
@@ -115,7 +129,6 @@ public class Piece_Controller : NetworkBehaviour
     {
         Piece_Data piece = Piece_Detection.GetPieceUnderMouse();
         if(piece != null) {
-
             if(piece.GetColor() != color) { return; }
             selectedPiece = piece;
 
@@ -175,6 +188,7 @@ public class Piece_Controller : NetworkBehaviour
             Board_Data.instance.boardPieces[decidedMove.x, decidedMove.y].health == 1)
         {
             //Skip Contest Phase
+            coinFlip = UnityEngine.Random.Range(0, 2);
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
             return;
@@ -182,6 +196,7 @@ public class Piece_Controller : NetworkBehaviour
 
         if (Input_Controller.instance.whiteButtonHolder.transform.childCount +
             Input_Controller.instance.blackButtonHolder.transform.childCount == 0) {
+            coinFlip = UnityEngine.Random.Range(0, 2);
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
             return;
@@ -189,20 +204,20 @@ public class Piece_Controller : NetworkBehaviour
 
         OnContestStarted?.Invoke(this, EventArgs.Empty);
         //Contest code moved to network controller
-
     }
     //Server may have to end contest, public
-    public void EndContest()
+    public void EndContest(int coinFlip)
     {
+        this.coinFlip = coinFlip;
         //Called by network controller to progress the game.
-        Input_Controller.instance.contestHolder.SetActive(false);
+        Input_Controller.instance.TurnOffContestHolders();
         if (phaseInTurn == PhaseInTurn.CONTEST) {
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
         }
     }
     //Server may have to move piece based on contest,  public
-    public void MovePiece(int coinFlip)
+    public void MovePiece()
     {
         if (coinFlip == CAPTURE)
         {
@@ -233,6 +248,8 @@ public class Piece_Controller : NetworkBehaviour
         }
         OnEndOfTurn?.Invoke(this, EventArgs.Empty);
     }
+
+
     void OnRollAgainPressed(object sender, EventArgs e)
     {
         if (phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && rerolled == false) {

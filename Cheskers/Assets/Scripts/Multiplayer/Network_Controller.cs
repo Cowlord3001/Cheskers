@@ -12,9 +12,11 @@ public class Network_Controller : NetworkBehaviour
 
     public NetworkVariable<Piece_Data.Color> turnColor;
 
+    public bool isMultiplayerGame = true;
     
     NetworkVariable<bool> whitePlayerDeclined;
     NetworkVariable<bool> blackPlayerDeclined;
+    NetworkVariable<int> coinFlip;
 
     //Contest Variables
     const int CAPTURE = 0;
@@ -27,12 +29,17 @@ public class Network_Controller : NetworkBehaviour
 
     private void Start()
     {
+        //Only Listen and set up networkvariables if its a multiplayer game.
+        if(isMultiplayerGame == false) { return; }
+
         NetworkVariable<Piece_Data.Color> turnColor =
             new NetworkVariable<Piece_Data.Color>(Piece_Data.Color.white);
         whitePlayerDeclined = new NetworkVariable<bool>();
         whitePlayerDeclined.Value = false;
         blackPlayerDeclined = new NetworkVariable<bool>();
         blackPlayerDeclined.Value = false;
+
+        coinFlip = new NetworkVariable<int>();
 
         //Detecting Game being hosted and clinet joining
         Multiplater_UI.OnGameHosted += OnGameHosted;
@@ -99,33 +106,32 @@ public class Network_Controller : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     void NewContestServerRPC()
     {
-        int coinFlip = UnityEngine.Random.Range(0, 2);
-        NewContestClientRPC(coinFlip);
+        coinFlip.Value = UnityEngine.Random.Range(0, 2);
+        NewContestClientRPC();
     }
 
     [ClientRpc]
-    void NewContestClientRPC(int coinFlip)
+    void NewContestClientRPC()
     {
         Debug.Log("CLIENTRPC: New Contest Started");
-        UpdateDisplayBasedOnCoinFlip(coinFlip);
+        Input_Controller.instance.UpdateDisplayBasedOnCoinFlip(coinFlip.Value);
     }
     //Someone decides to reroll
     void OnContestButtonPressed(object sender, Input_Controller.EventArgsOnContestButtonClicked e)
     {
         Debug.Log("NETWORK_EVENT: ContestButtonPressed Detected");
-
         ContestedServerRPC(e.colorOfPresser);
     }
 
     [ServerRpc(RequireOwnership = false)]
     void ContestedServerRPC(Piece_Data.Color colorOfSender)
     {
-        int coinFlip = UnityEngine.Random.Range(0, 2);
-        ContestedClientRPC(coinFlip, colorOfSender);
+        coinFlip.Value = UnityEngine.Random.Range(0, 2);
+        ContestedClientRPC(colorOfSender);
     }
 
     [ClientRpc]
-    void ContestedClientRPC(int coinFlip, Piece_Data.Color colorOfSender)
+    void ContestedClientRPC(Piece_Data.Color colorOfSender)
     {
         Debug.Log("CLIENTRPC: New Contest Started");
 
@@ -135,7 +141,7 @@ public class Network_Controller : NetworkBehaviour
         else {
             Destroy( Input_Controller.instance.blackButtonHolder.transform.GetChild(0).gameObject);
         }
-        UpdateDisplayBasedOnCoinFlip(coinFlip);
+        Input_Controller.instance.UpdateDisplayBasedOnCoinFlip(coinFlip.Value);
 
         //Check if contest should end
         if( Input_Controller.instance.whiteButtonHolder.transform.childCount +
@@ -144,18 +150,6 @@ public class Network_Controller : NetworkBehaviour
             //TODO: Children not adding up correctly so this doesnt run
             DeclinePressedServerRpc(Piece_Controller.instance.color);
         }
-    }
-
-    void UpdateDisplayBasedOnCoinFlip(int coinFlip) 
-    {
-        Input_Controller.instance.contestHolder.SetActive(true);
-        if (coinFlip == CAPTURE) {
-            Input_Controller.instance.contestText.text = "Piece Capture";
-        }
-        else {
-            Input_Controller.instance.contestText.text = "Piece Damage";
-        }
-
     }
 
     void OnDeclinedPressed(object sender, EventArgs e)
@@ -179,15 +173,15 @@ public class Network_Controller : NetworkBehaviour
             //EndContest
             whitePlayerDeclined.Value = false;
             blackPlayerDeclined.Value = false;
-            EndContestClientRpc();
+            EndContestClientRpc(coinFlip.Value);
         }
     }
 
     [ClientRpc]
-    void EndContestClientRpc()
+    void EndContestClientRpc(int coinFlip)
     {
         //Piece_Controller.instance
-        Piece_Controller.instance.EndContest();
+        Piece_Controller.instance.EndContest(coinFlip);
     }
 
     #endregion
