@@ -14,8 +14,8 @@ public class SinglePlayer_Controller : MonoBehaviour
     {
         if(Network_Controller.instance.isMultiplayerGame == true) { return; }
 
-        Input_Controller.instance.OnContestButtonClicked  += OnContestButtonPressed;
-        Input_Controller.instance.OnContestButton2Clicked += OnContestButton2Pressed;
+        Input_Controller.instance.OnContestButtonClicked  += OnNewContest;
+        Input_Controller.instance.OnContestButton2Clicked += OnNewContest;
         Input_Controller.instance.OnDeclineButtonClicked  += OnDeclinedPressed;
         Input_Controller.instance.OnDeclineButton2Clicked += OnDeclined2Pressed;
 
@@ -29,12 +29,16 @@ public class SinglePlayer_Controller : MonoBehaviour
 
     }
 
+    //This happens when a player tries to take or damaeg a piece
     void OnContestStarting(object sender, EventArgs e)
     {
-        NewContest();
+        //Multiplayer needs these but not singleplayer
+        Input_Controller.EventArgsOnContestButtonClicked f = new Input_Controller.EventArgsOnContestButtonClicked();
+        OnNewContest(sender, f);
     }
 
-    void NewContest()
+    //This listens for the contest button to be clicked and is also called when a fresh contest starts
+    void OnNewContest(object sender, Input_Controller.EventArgsOnContestButtonClicked e)
     {
         coinFlip = UnityEngine.Random.Range(0, 2);
 
@@ -44,37 +48,22 @@ public class SinglePlayer_Controller : MonoBehaviour
         Input_Controller.instance.UpdateDisplayBasedOnCoinFlip(coinFlip);
 
         Debug.Log("New Contest Started");
-        Debug.Log("WHITE: " + Input_Controller.instance.whiteButtonHolder.transform.childCount);
-        Debug.Log("BLACK: " + Input_Controller.instance.blackButtonHolder.transform.childCount);
+        //Debug.Log("WHITE: " + Input_Controller.instance.whiteButtonHolder.transform.childCount);
+        //Debug.Log("BLACK: " + Input_Controller.instance.blackButtonHolder.transform.childCount);
 
         //Check if contest should end
-        if (Input_Controller.instance.whiteButtonHolder.transform.childCount == 0) {
+        if (Input_Controller.instance.WhitePlayerHasTokens() == false) {
             //Simulate pressing decline button
             Input_Controller.instance.ButtonPressedDecline();
             Debug.Log("Simulating white button decline");
         }
-        if (Input_Controller.instance.blackButtonHolder.transform.childCount == 0) {
+        if (Input_Controller.instance.BlackPlayerHasTokens() == false) {
             //Simulate pressing decline button
             Input_Controller.instance.Button2PressedDecline();
             Debug.Log("Simulating black button decline");
         }
     }
 
-    void OnContestButtonPressed(object sender, Input_Controller.EventArgsOnContestButtonClicked e)
-    {
-        Debug.Log("Destroying white Button Child");
-        Destroy(Input_Controller.instance.whiteButtonHolder.transform.GetChild(0).gameObject);
-
-        NewContest();
-    }
-    void OnContestButton2Pressed(object sender, Input_Controller.EventArgsOnContestButtonClicked e)
-    {
-        Debug.Log("Destroying black Button Child");
-        Destroy(Input_Controller.instance.blackButtonHolder.transform.GetChild(0).gameObject);
-
-        NewContest();
-        
-    }
     void OnDeclinedPressed(object sender, EventArgs e)
     {
         decline = true;
@@ -82,7 +71,6 @@ public class SinglePlayer_Controller : MonoBehaviour
     }
     void OnDeclined2Pressed(object sender, EventArgs e)
     {
-        Debug.Log("Decline Button 2 Pressed SinglePlayerController");
         decline2 = true;
         CheckEndContest();
     }

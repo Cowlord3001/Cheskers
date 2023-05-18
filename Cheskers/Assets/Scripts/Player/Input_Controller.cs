@@ -32,10 +32,15 @@ public class Input_Controller : MonoBehaviour
     [SerializeField] Button rerollPieceButton;
 
     [Header("ReRollButtonSettings")]
-    public GameObject whiteButtonHolder;
+    /// <summary>
+    /// This holds the black buttons that belong to the whilte player
+    /// </summary>
+    [SerializeField] GameObject whiteButtonHolder;
     [SerializeField] GameObject whiteRerollButton;
-
-    public GameObject blackButtonHolder;
+    /// <summary>
+    /// This holds the white buttons that belong to the black player
+    /// </summary>
+    [SerializeField] GameObject blackButtonHolder;
     [SerializeField] GameObject blackRerollButton;
 
     [Header("ContestSettings")]
@@ -48,6 +53,15 @@ public class Input_Controller : MonoBehaviour
 
     [SerializeField] Text contestText;
     [SerializeField] Text contest2Text;
+
+    /// <summary>
+    /// White Tokens are owned by the black player
+    /// </summary>
+    int whiteTokens = 0;
+    /// <summary>
+    /// Black tokens are owned by the white player
+    /// </summary>
+    int blackTokens = 0;
 
     private void Awake()
     {
@@ -76,11 +90,36 @@ public class Input_Controller : MonoBehaviour
     void OnPieceRemovedFromBoardListener(object sender, Board_Data.EventArgsPieceRemoved e)
     {
         if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
+            //Removed a white piece and black should gain a token
+            whiteTokens++;
             GiveContestToken(Piece_Data.Color.black);
         }
         else {
+            blackTokens++;
             GiveContestToken(Piece_Data.Color.white);
         }
+    }
+
+    public bool WhitePlayerHasTokens()
+    {
+        if (blackTokens == 0) return false;
+        else return true;
+    }
+    public bool BlackPlayerHasTokens()
+    {
+        if (whiteTokens == 0) return false;
+        else return true;
+    }
+
+    void RemoveBlackToken()
+    {
+        blackTokens--;
+        Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
+    }
+    void RemoveWhiteToken()
+    {
+        whiteTokens--;
+        Destroy(blackButtonHolder.transform.GetChild(0).gameObject);
     }
 
     public void GiveContestToken(Piece_Data.Color color)
@@ -94,25 +133,25 @@ public class Input_Controller : MonoBehaviour
             //go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
         }
     }
-
     void ButtonPressedReroll()
     {
         OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
     }
 
-
     void ButtonPressedContest()
     {
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
         e.colorOfPresser = Piece_Controller.instance.color;
-        if (Network_Controller.instance.isMultiplayerGame == true) { 
+        if (Network_Controller.instance.isMultiplayerGame == false) { 
             e.colorOfPresser = Piece_Data.Color.white; 
         }
 
-        if (e.colorOfPresser == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
+        if (e.colorOfPresser == Piece_Data.Color.white && blackTokens > 0) {
+            RemoveBlackToken();
             OnContestButtonClicked?.Invoke(this, e);
         }
-        else if (e.colorOfPresser == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
+        else if (e.colorOfPresser == Piece_Data.Color.black && whiteTokens > 0) {
+            RemoveWhiteToken();
             OnContestButtonClicked?.Invoke(this, e);
         }
     }
@@ -131,10 +170,8 @@ public class Input_Controller : MonoBehaviour
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
         e.colorOfPresser = Piece_Data.Color.black;
 
-        if (e.colorOfPresser == Piece_Data.Color.white && whiteButtonHolder.transform.childCount > 0) {
-            OnContestButton2Clicked?.Invoke(this, e);
-        }
-        else if (e.colorOfPresser == Piece_Data.Color.black && blackButtonHolder.transform.childCount > 0) {
+        if (e.colorOfPresser == Piece_Data.Color.black && whiteTokens > 0) {
+            RemoveWhiteToken();
             OnContestButton2Clicked?.Invoke(this, e);
         }
     }
@@ -144,6 +181,7 @@ public class Input_Controller : MonoBehaviour
         //Color green after pressed for visual feedback
         ColorBlock colorBlock = decline2Button.colors;
         colorBlock.normalColor = Color.green;
+        decline2Button.colors = colorBlock;
 
         OnDeclineButton2Clicked?.Invoke(this, EventArgs.Empty);
     }

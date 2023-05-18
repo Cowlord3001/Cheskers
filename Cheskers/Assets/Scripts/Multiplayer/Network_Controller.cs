@@ -40,6 +40,7 @@ public class Network_Controller : NetworkBehaviour
         blackPlayerDeclined.Value = false;
 
         coinFlip = new NetworkVariable<int>();
+        coinFlip.Value = CAPTURE;
 
         //Detecting Game being hosted and clinet joining
         Multiplater_UI.OnGameHosted += OnGameHosted;
@@ -71,6 +72,7 @@ public class Network_Controller : NetworkBehaviour
         //Set Host to white
         Piece_Controller.instance.color = Piece_Data.Color.white;
         Piece_Controller.instance.StartTurn();
+
         SubscribeToPieceControllerEvents();
 
     }
@@ -135,17 +137,18 @@ public class Network_Controller : NetworkBehaviour
     {
         Debug.Log("CLIENTRPC: New Contest Started");
 
-        if(colorOfSender == Piece_Data.Color.white) {
-            Destroy( Input_Controller.instance.whiteButtonHolder.transform.GetChild(0).gameObject);
-        }
-        else {
-            Destroy( Input_Controller.instance.blackButtonHolder.transform.GetChild(0).gameObject);
-        }
+        //TODO: This may be broken. Need to see if changes made in input carry over correctly
+        //if(colorOfSender == Piece_Data.Color.white) {
+        //    Destroy( Input_Controller.instance.whiteButtonHolder.transform.GetChild(0).gameObject);
+        //}
+        //else {
+        //    Destroy( Input_Controller.instance.blackButtonHolder.transform.GetChild(0).gameObject);
+        //}
         Input_Controller.instance.UpdateDisplayBasedOnCoinFlip(coinFlip.Value);
 
         //Check if contest should end
-        if( Input_Controller.instance.whiteButtonHolder.transform.childCount +
-            Input_Controller.instance.blackButtonHolder.transform.childCount == 0){
+        if(Input_Controller.instance.WhitePlayerHasTokens() == false &&
+           Input_Controller.instance.BlackPlayerHasTokens() == false) {
             //Simulate both pressing decline button
             //TODO: Children not adding up correctly so this doesnt run
             DeclinePressedServerRpc(Piece_Controller.instance.color);
@@ -191,10 +194,12 @@ public class Network_Controller : NetworkBehaviour
     void OnPieceTransformed(object sender, Piece_Display.EventArgsOnPieceTransformed e)
     {
         Debug.Log("NETWORK_EVENT: TransformedEvent Detected");
+        Debug.Log("TURN COLOR: " + turnColor.Value);
+        Debug.Log("TURN COLOR: " + Piece_Controller.instance.color);
+
         if (turnColor.Value == Piece_Controller.instance.color) {
             //If a piece was transformed on your turn you need to tell the other player
             PieceTransformedServerRpc(e.Piece.positionOnBoard.x, e.Piece.positionOnBoard.y, e.chessMoveIndex, Piece_Controller.instance.color);
-
         }
     }
     [ServerRpc(RequireOwnership = false)]
@@ -241,7 +246,6 @@ public class Network_Controller : NetworkBehaviour
         if(turnColor.Value == Piece_Controller.instance.color) {
             RemoveHighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.color);
         }
-
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -284,6 +288,8 @@ public class Network_Controller : NetworkBehaviour
     void EndTurnClientRPC(Piece_Data.Color colorWhosTurnIsEnding)
     {
         Debug.Log("CLIENT RPC: End Turn");
+        Debug.Log("PlayerColor: " + Piece_Controller.instance.color.ToString());
+        Debug.Log("EndingColor: " + colorWhosTurnIsEnding.ToString());
         //This is called on all clients. 
         if (colorWhosTurnIsEnding == Piece_Data.Color.white) {
             if (Piece_Controller.instance.color == Piece_Data.Color.black) {
@@ -383,7 +389,6 @@ public class Network_Controller : NetworkBehaviour
         }
         Piece_Display.instance.UpdatePieces();
     }
-
     #endregion
 }
 

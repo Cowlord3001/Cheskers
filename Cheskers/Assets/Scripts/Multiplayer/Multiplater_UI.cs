@@ -43,11 +43,13 @@ public class Multiplater_UI : MonoBehaviour
     void GameHosted()
     {
         OnGameHosted?.Invoke(this, EventArgs.Empty);
+        Debug.Log(Network_Controller.instance.isMultiplayerGame);
     }
 
     void ClinetJoined()
     {
         OnGameClientJoined?.Invoke(this, EventArgs.Empty);
+        Debug.Log(Network_Controller.instance.isMultiplayerGame);
     }
 
 }

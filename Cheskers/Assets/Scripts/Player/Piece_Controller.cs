@@ -194,8 +194,8 @@ public class Piece_Controller : NetworkBehaviour
             return;
         }
 
-        if (Input_Controller.instance.whiteButtonHolder.transform.childCount +
-            Input_Controller.instance.blackButtonHolder.transform.childCount == 0) {
+        if (Input_Controller.instance.WhitePlayerHasTokens() == false &&
+            Input_Controller.instance.BlackPlayerHasTokens() == false) {
             coinFlip = UnityEngine.Random.Range(0, 2);
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
