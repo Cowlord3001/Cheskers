@@ -19,7 +19,9 @@ public class Piece_Controller : NetworkBehaviour
     //PUBLIC DATA
     public static Piece_Controller instance;
     //Host sets themself to white so default color is black
-    public Piece_Data.Color color = Piece_Data.Color.black;
+    Piece_Data.Color color = Piece_Data.Color.black;
+    public Piece_Data.Color GetPlayerColor() { return color; }
+    public void SetPlayerColor(Piece_Data.Color newColor) { color = newColor; }
     public enum PhaseInTurn
     {
         PIECE_SELECTION,
@@ -51,12 +53,6 @@ public class Piece_Controller : NetworkBehaviour
     {
         phaseInTurn = PhaseInTurn.PIECE_SELECTION;
     }
-
-    private void Awake()
-    {
-        instance = this;
-    }
-
     // Start is called before the first frame update
     void Start()
     {
@@ -69,12 +65,16 @@ public class Piece_Controller : NetworkBehaviour
             color = Piece_Data.Color.white;
             phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         }
+        instance = this;
+
+
         Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
         Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
         Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
         //Input_Controller.instance.OnContestButtonClicked += OnContestPressed;
         //Input_Controller.instance.OnDeclineButtonClicked += OnDeclinePressed;
     }
+
 
     //Event only fires on mouseclicks on the board
     void OnLeftMouseClick(object sender, EventArgs e)
@@ -83,6 +83,7 @@ public class Piece_Controller : NetworkBehaviour
             if (IsOwner == false) return;
             if (Network_Controller.instance.turnColor.Value != color) { return; }
         }
+
         AdvanceGame(true);
     }
     void AdvanceGame(bool mouseClicked = false)
@@ -129,7 +130,8 @@ public class Piece_Controller : NetworkBehaviour
     {
         Piece_Data piece = Piece_Detection.GetPieceUnderMouse();
         if(piece != null) {
-            if(piece.GetColor() != color) { return; }
+            //DEV COMMAND USED
+            if(piece.GetColor() != color && Input_Controller.developerCommandsEnabled == false) { return; }
             selectedPiece = piece;
 
             //Debug.Log(selectedPiece.gameObject.name);
@@ -231,7 +233,6 @@ public class Piece_Controller : NetworkBehaviour
         {
             Debug.LogWarning("Error: Invalid Coin Flip");
         }
-        Debug.Log(Board_Data.instance.debugMessage);
         UpdateBoardAndPieceGraphics();
         RemoveHighlightOnSelectedPiece();
         phaseInTurn = PhaseInTurn.END_OF_TURN;
@@ -252,7 +253,8 @@ public class Piece_Controller : NetworkBehaviour
 
     void OnRollAgainPressed(object sender, EventArgs e)
     {
-        if (phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && rerolled == false) {
+        if (phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && 
+           (rerolled == false || Input_Controller.developerCommandsEnabled)) {
             UpdateBoardAndPieceGraphics();
             RemoveHighlightOnSelectedPiece();
 

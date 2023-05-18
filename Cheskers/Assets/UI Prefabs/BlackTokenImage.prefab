@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 856846732915341152}
   - component: {fileID: 3770012429538235396}
   m_Layer: 5
-  m_Name: WhiteReRollButtom
+  m_Name: BlackTokenImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

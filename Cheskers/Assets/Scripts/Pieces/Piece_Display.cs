@@ -92,12 +92,10 @@ public class Piece_Display : MonoBehaviour
         
         OnPieceTransformed?.Invoke(this, e);
     }
-
     void OnPieceRemoved(object sender, Board_Data.EventArgsPieceRemoved e)
     {
         Destroy(e.removedPiece.gameObject);
     }
-
     void OnPieceDamaged(object sender, Board_Data.EventArgsPieceDamaged e)
     {
         UpdatePieces();

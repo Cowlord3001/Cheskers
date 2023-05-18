@@ -12,7 +12,6 @@ public class Input_Controller : MonoBehaviour
     public static Input_Controller instance;
     [HideInInspector] public Vector3 mouseWorldPosition;
     [HideInInspector] public Vector2Int mouseBoardPosition;
-    public bool developerCommandsEnabled;
 
     public event EventHandler OnLeftMouseClick;
     public event EventHandler OnRollAgainButtonClicked;
@@ -35,13 +34,13 @@ public class Input_Controller : MonoBehaviour
     /// <summary>
     /// This holds the black buttons that belong to the whilte player
     /// </summary>
-    [SerializeField] GameObject whiteButtonHolder;
-    [SerializeField] GameObject whiteRerollButton;
+    [SerializeField] GameObject blackTokenImageHolder;
+    [SerializeField] GameObject blackTokenImage;
     /// <summary>
     /// This holds the white buttons that belong to the black player
     /// </summary>
-    [SerializeField] GameObject blackButtonHolder;
-    [SerializeField] GameObject blackRerollButton;
+    [SerializeField] GameObject whiteTokenImageHolder;
+    [SerializeField] GameObject whiteTokenImage;
 
     [Header("ContestSettings")]
     [SerializeField] GameObject contestHolder;
@@ -66,7 +65,6 @@ public class Input_Controller : MonoBehaviour
     private void Awake()
     {
         instance = this;
-
     }
 
     private void Start()
@@ -87,15 +85,56 @@ public class Input_Controller : MonoBehaviour
         decline2Button.onClick.AddListener(() => Button2PressedDecline());
     }
 
+    #region DevControls
+    
+    public static bool developerCommandsEnabled;
+
+    //What do we to do.
+    //INFINITE REROLLS (PIECE_CONTROLLER)
+    //INFINITE CONTEST - DONE BY ADDING TOKENS
+
+    //CHOOSE PIECE 
+    //OVERRIDE TURN (DONE)
+
+
+    #endregion
+
+    private void Update()
+    {
+        if (developerCommandsEnabled) {
+            if (Input.GetKeyDown(KeyCode.LeftBracket)) { GiveContestToken(Piece_Data.Color.black); }
+            if (Input.GetKeyDown(KeyCode.RightBracket)) { GiveContestToken(Piece_Data.Color.white); }
+        }
+        if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }
+
+        if(Input.GetKeyDown(KeyCode.P)) {
+            developerCommandsEnabled = !developerCommandsEnabled;
+        }
+
+        //Temporary till hosting scene is seperate.
+        if (Camera.main == null) { return; }
+
+        mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition.x, mouseWorldPosition.y);
+        if (Input.GetMouseButtonDown(0)) {
+            float halfWidth = Board_Data.instance.size / 2;
+            //Only count clicks on the board to prevent button double clicks
+            if (mouseWorldPosition.x < halfWidth &&
+                mouseWorldPosition.x > -halfWidth &&
+                mouseWorldPosition.y < halfWidth &&
+                mouseWorldPosition.y > -halfWidth)
+
+                //Send left click to listeners
+                OnLeftMouseClick?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     void OnPieceRemovedFromBoardListener(object sender, Board_Data.EventArgsPieceRemoved e)
     {
         if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
-            //Removed a white piece and black should gain a token
-            whiteTokens++;
             GiveContestToken(Piece_Data.Color.black);
         }
         else {
-            blackTokens++;
             GiveContestToken(Piece_Data.Color.white);
         }
     }
@@ -114,23 +153,26 @@ public class Input_Controller : MonoBehaviour
     void RemoveBlackToken()
     {
         blackTokens--;
-        Destroy(whiteButtonHolder.transform.GetChild(0).gameObject);
+        Destroy(blackTokenImageHolder.transform.GetChild(0).gameObject);
     }
     void RemoveWhiteToken()
     {
         whiteTokens--;
-        Destroy(blackButtonHolder.transform.GetChild(0).gameObject);
+        Destroy(whiteTokenImageHolder.transform.GetChild(0).gameObject);
     }
-
+    /// <summary>
+    /// Gives a token to the player with the corrsponding color.
+    /// </summary>
+    /// <param name="color"></param>
     public void GiveContestToken(Piece_Data.Color color)
     {
         if (color == Piece_Data.Color.white) {
-            GameObject go = Instantiate(whiteRerollButton, whiteButtonHolder.transform);
-            //go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
+            GameObject go = Instantiate(blackTokenImage, blackTokenImageHolder.transform);
+            blackTokens++;
         }
         else {
-            GameObject go = Instantiate(blackRerollButton, blackButtonHolder.transform);
-            //go.GetComponent<Button>().onClick.AddListener(() => ButtonPressedContest());
+            GameObject go = Instantiate(whiteTokenImage, whiteTokenImageHolder.transform);
+            whiteTokens++;
         }
     }
     void ButtonPressedReroll()
@@ -141,7 +183,7 @@ public class Input_Controller : MonoBehaviour
     void ButtonPressedContest()
     {
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
-        e.colorOfPresser = Piece_Controller.instance.color;
+        e.colorOfPresser = Piece_Controller.instance.GetPlayerColor();
         if (Network_Controller.instance.isMultiplayerGame == false) { 
             e.colorOfPresser = Piece_Data.Color.white; 
         }
@@ -210,31 +252,8 @@ public class Input_Controller : MonoBehaviour
     }
 
 
-    private void Update()
-    {
-        if(developerCommandsEnabled)
-        {
-            if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }
-            if (Input.GetKeyDown(KeyCode.T)) { Instantiate(whiteRerollButton, whiteButtonHolder.transform); }
-        }
 
-        //Temporary till hosting scene is seperate.
-        if(Camera.main == null) { return; }
 
-        mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition.x,mouseWorldPosition.y);
-        if(Input.GetMouseButtonDown(0)) {
-            float halfWidth = Board_Data.instance.size / 2;
-            //Only count clicks on the board to prevent button double clicks
-            if (mouseWorldPosition.x <  halfWidth &&
-                mouseWorldPosition.x > -halfWidth &&
-                mouseWorldPosition.y <  halfWidth &&
-                mouseWorldPosition.y > -halfWidth)
-
-            //Send left click to listeners
-            OnLeftMouseClick?.Invoke(this, EventArgs.Empty);
-        }
-    }
 
     const int CAPTURE = 0;
     const int DAMAGE = 1;

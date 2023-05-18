@@ -70,7 +70,7 @@ public class Network_Controller : NetworkBehaviour
         //White goes first
         turnColor.Value = Piece_Data.Color.white;
         //Set Host to white
-        Piece_Controller.instance.color = Piece_Data.Color.white;
+        Piece_Controller.instance.SetPlayerColor(Piece_Data.Color.white);
         Piece_Controller.instance.StartTurn();
 
         SubscribeToPieceControllerEvents();
@@ -151,14 +151,14 @@ public class Network_Controller : NetworkBehaviour
            Input_Controller.instance.BlackPlayerHasTokens() == false) {
             //Simulate both pressing decline button
             //TODO: Children not adding up correctly so this doesnt run
-            DeclinePressedServerRpc(Piece_Controller.instance.color);
+            DeclinePressedServerRpc(Piece_Controller.instance.GetPlayerColor());
         }
     }
 
     void OnDeclinedPressed(object sender, EventArgs e)
     {
         Debug.Log("NETWORK_EVENT: DeclinedPressed Detected");
-        DeclinePressedServerRpc(Piece_Controller.instance.color);
+        DeclinePressedServerRpc(Piece_Controller.instance.GetPlayerColor());
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -195,11 +195,11 @@ public class Network_Controller : NetworkBehaviour
     {
         Debug.Log("NETWORK_EVENT: TransformedEvent Detected");
         Debug.Log("TURN COLOR: " + turnColor.Value);
-        Debug.Log("TURN COLOR: " + Piece_Controller.instance.color);
+        Debug.Log("TURN COLOR: " + Piece_Controller.instance.GetPlayerColor());
 
-        if (turnColor.Value == Piece_Controller.instance.color) {
+        if (turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
             //If a piece was transformed on your turn you need to tell the other player
-            PieceTransformedServerRpc(e.Piece.positionOnBoard.x, e.Piece.positionOnBoard.y, e.chessMoveIndex, Piece_Controller.instance.color);
+            PieceTransformedServerRpc(e.Piece.positionOnBoard.x, e.Piece.positionOnBoard.y, e.chessMoveIndex, Piece_Controller.instance.GetPlayerColor());
         }
     }
     [ServerRpc(RequireOwnership = false)]
@@ -210,7 +210,7 @@ public class Network_Controller : NetworkBehaviour
     void PieceTransformedClientRpc(int pieceXPos, int pieceYpos, int chessMoveIndex, Piece_Data.Color colorCallingUpdate)
     {
         Debug.Log("CLIENTRPC: Piece Transformed");
-        if(colorCallingUpdate != Piece_Controller.instance.color) {
+        if(colorCallingUpdate != Piece_Controller.instance.GetPlayerColor()) {
             //Piece_Controller.instance.TransformSelectedPiece();
             Piece_Display.instance.TransformSelectedPiece(Board_Data.instance.boardPieces[pieceXPos, pieceYpos], chessMoveIndex);
         }
@@ -218,8 +218,8 @@ public class Network_Controller : NetworkBehaviour
     void OnHighlightValidMoves(object sender, Board_Display.EventArgsOnValidMovesHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesHighlighted Detected");
-        if(turnColor.Value == Piece_Controller.instance.color) {
-            HighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.color);
+        if(turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
+            HighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.GetPlayerColor());
         }
     }
 
@@ -233,7 +233,7 @@ public class Network_Controller : NetworkBehaviour
     void HighlightValidMovesClientRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
     {
         Debug.Log("CLIENTRPC: Valid Moves Highlighted");
-        if(Piece_Controller.instance.color != colorOfSender) {
+        if(Piece_Controller.instance.GetPlayerColor() != colorOfSender) {
             List<Vector2Int> validMovesList = new List<Vector2Int>(validMoves);
             Board_Display.instance.HighLightPossibleMoves(validMovesList);
         }
@@ -243,8 +243,8 @@ public class Network_Controller : NetworkBehaviour
     void OnValidMovesDeHighlighted(object sender, Board_Display.EventArgsOnValidMovesDeHighlighted e)
     {
         Debug.Log("NETWORK_EVENT: MovesDeHighlighted Detected");
-        if(turnColor.Value == Piece_Controller.instance.color) {
-            RemoveHighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.color);
+        if(turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
+            RemoveHighlightValidMovesServerRpc(e.validMoves, Piece_Controller.instance.GetPlayerColor());
         }
     }
 
@@ -257,7 +257,7 @@ public class Network_Controller : NetworkBehaviour
     [ClientRpc]
     void RemoveHighlightValidMovesClientRpc(Vector2Int[] validMoves, Piece_Data.Color colorOfSender)
     {
-        if(colorOfSender != Piece_Controller.instance.color) {
+        if(colorOfSender != Piece_Controller.instance.GetPlayerColor()) {
             List<Vector2Int> validMovesList = new List<Vector2Int>(validMoves);
             Board_Display.instance.RemoveHighLightPossibleMoves(validMovesList);
         }
@@ -288,17 +288,17 @@ public class Network_Controller : NetworkBehaviour
     void EndTurnClientRPC(Piece_Data.Color colorWhosTurnIsEnding)
     {
         Debug.Log("CLIENT RPC: End Turn");
-        Debug.Log("PlayerColor: " + Piece_Controller.instance.color.ToString());
+        Debug.Log("PlayerColor: " + Piece_Controller.instance.GetPlayerColor().ToString());
         Debug.Log("EndingColor: " + colorWhosTurnIsEnding.ToString());
         //This is called on all clients. 
         if (colorWhosTurnIsEnding == Piece_Data.Color.white) {
-            if (Piece_Controller.instance.color == Piece_Data.Color.black) {
+            if (Piece_Controller.instance.GetPlayerColor() == Piece_Data.Color.black) {
                 //Start turn
                 Piece_Controller.instance.StartTurn();
             }
         }
         else {
-            if (Piece_Controller.instance.color == Piece_Data.Color.white) {
+            if (Piece_Controller.instance.GetPlayerColor() == Piece_Data.Color.white) {
                 //Start turn
                 Piece_Controller.instance.StartTurn();
             }
@@ -312,9 +312,9 @@ public class Network_Controller : NetworkBehaviour
     {
         Debug.Log("NETWORK_EVENT: PieceRemovedFromBoard Detected");
         //Board Data already updated on the client side when this is called
-        if (turnColor.Value == Piece_Controller.instance.color) {
+        if (turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
             //Only update other players on your turn
-            PieceRemovedServerRPC(e.removedPiece.positionOnBoard.x, e.removedPiece.positionOnBoard.y, Piece_Controller.instance.color);
+            PieceRemovedServerRPC(e.removedPiece.positionOnBoard.x, e.removedPiece.positionOnBoard.y, Piece_Controller.instance.GetPlayerColor());
         }
     }
 
@@ -328,7 +328,7 @@ public class Network_Controller : NetworkBehaviour
     void PieceRemovedClientRPC(int pieceRemovedXBoardLocation, int pieceRemoveYBoardLocation, Piece_Data.Color colorCallingTheUpdate)
     {
         Debug.Log("CLIENT RPC: PieceRemovedClientRPC called");
-        if(Piece_Controller.instance.color != colorCallingTheUpdate) {
+        if(Piece_Controller.instance.GetPlayerColor() != colorCallingTheUpdate) {
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.RemovePiece(pieceRemovedXBoardLocation, pieceRemoveYBoardLocation);
         }
@@ -339,9 +339,9 @@ public class Network_Controller : NetworkBehaviour
     void OnPieceDamaged(object sender, Board_Data.EventArgsPieceDamaged e)
     {
         Debug.Log("NETWORK_EVENT: OnPieceDamaged Detected");
-        if (turnColor.Value == Piece_Controller.instance.color) {
+        if (turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
             //Only update other players on your turn
-            PieceDamagedServerRPC(e.damagedPiece.positionOnBoard.x, e.damagedPiece.positionOnBoard.y, Piece_Controller.instance.color);
+            PieceDamagedServerRPC(e.damagedPiece.positionOnBoard.x, e.damagedPiece.positionOnBoard.y, Piece_Controller.instance.GetPlayerColor());
         }
     }
 
@@ -355,7 +355,7 @@ public class Network_Controller : NetworkBehaviour
     void PieceDamagedClientRPC(int pieceDamagedXBoardLocation, int pieceDamagedYBoardLocation, Piece_Data.Color colorCallingTheUpdate)
     {
         Debug.Log("CLIENTRPC: Piece Damaged Detected");
-        if (Piece_Controller.instance.color != colorCallingTheUpdate) {
+        if (Piece_Controller.instance.GetPlayerColor() != colorCallingTheUpdate) {
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.DamagePiece(pieceDamagedXBoardLocation, pieceDamagedYBoardLocation);
         }
@@ -365,11 +365,11 @@ public class Network_Controller : NetworkBehaviour
     void OnPieceMoved(object sender, Board_Data.EventArgsPieceMoved e)
     {
         Debug.Log("NETWORK_EVENT: OnPieceMoved Detected");
-        if (turnColor.Value == Piece_Controller.instance.color) {
+        if (turnColor.Value == Piece_Controller.instance.GetPlayerColor()) {
             //Only update other players on your turn
             PieceMovedServerRPC(e.pieceStartBoardCordintaes.x, e.pieceStartBoardCordintaes.y,
                                   e.pieceEndBoardCordintaes.x, e.pieceEndBoardCordintaes.y,
-                                  Piece_Controller.instance.color);
+                                  Piece_Controller.instance.GetPlayerColor());
         }
     }
 
@@ -383,7 +383,7 @@ public class Network_Controller : NetworkBehaviour
     void PieceMovedClientRPC(int oldXPos, int oldYPos, int newXPos, int newYPos, Piece_Data.Color colorCallingTheUpdate)
     {
         Debug.Log("CLIENTRPC: Piece Moved Detected");
-        if (Piece_Controller.instance.color != colorCallingTheUpdate) {
+        if (Piece_Controller.instance.GetPlayerColor() != colorCallingTheUpdate) {
             //if it is not your turn you need to be updated of your oponents move
             Board_Data.instance.MovePieceNetworkCall(oldXPos, oldYPos, newXPos, newYPos);
         }

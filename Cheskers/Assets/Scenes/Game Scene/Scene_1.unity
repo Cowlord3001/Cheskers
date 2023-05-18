@@ -1704,7 +1704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnColor:
     m_InternalValue: 0
-  isMultiplayerGame: 1
+  isMultiplayerGame: 0
 --- !u!4 &1255418224
 Transform:
   m_ObjectHideFlags: 0

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class  Piece_Data
+public class Piece_Data
 {
     public GameObject gameObject;
     public Vector2Int positionOnBoard;
@@ -10,7 +10,12 @@ public class  Piece_Data
     public Type type = Type.none;
     public enum Color { white, black };
     Color color;
-    
+
+    //Reset at the start of your turn only
+    public bool enPassantTag = false;
+    public bool kingTag = false;
+    public bool rookTag = false;
+
     public bool IsVIP;//Not Used Yet
     public int health;
     public bool hasMoved;

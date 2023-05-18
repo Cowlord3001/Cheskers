@@ -157,21 +157,22 @@ public class Board_Data
     List<Vector2Int> GetExtraPawnMoves(Piece_Data piece)
     {
         List<Vector2Int> ExtraMoves = new List<Vector2Int>();
-
         if(piece.hasMoved == false) {
             int newXpos = piece.positionOnBoard.x;
-            int newYpos;
+            int newYpos = piece.positionOnBoard.y;
             int moveValidateResult1;
             int moveValidateResult2;
             if (piece.GetColor() == Piece_Data.Color.white) {
-                newYpos = piece.positionOnBoard.y + 2;
+                newYpos += 1;
                 moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
-                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos + 1);
+                newYpos += 1;
+                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos);
             }
             else {
-                newYpos = piece.positionOnBoard.y - 2;
+                newYpos -= 1;
                 moveValidateResult1 = ValidMove(piece.GetColor(), newXpos, newYpos);
-                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos - 1);
+                newYpos -= 1;
+                moveValidateResult2 = ValidMove(piece.GetColor(), newXpos, newYpos);
             }
 
             if (moveValidateResult1 == MOVING_TO_EMPTY && moveValidateResult2 == MOVING_TO_EMPTY) {

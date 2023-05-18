@@ -84,11 +84,12 @@ public class SinglePlayer_Controller : MonoBehaviour
     
     void OnEndTurn(object sender, EventArgs e)
     {
-        if (Piece_Controller.instance.color == Piece_Data.Color.white) {
-            Piece_Controller.instance.color = Piece_Data.Color.black;
+        Debug.LogWarning("SingPlayer Ender of Turn Changing Colors");
+        if (Piece_Controller.instance.GetPlayerColor() == Piece_Data.Color.white) {
+            Piece_Controller.instance.SetPlayerColor(Piece_Data.Color.black);
         }
         else {
-            Piece_Controller.instance.color = Piece_Data.Color.white;
+            Piece_Controller.instance.SetPlayerColor(Piece_Data.Color.white);
         }
         Piece_Controller.instance.StartTurn();
     }
