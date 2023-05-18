@@ -1468,13 +1468,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseWorldPosition: {x: 0, y: 0, z: 0}
   mouseBoardPosition: {x: 0, y: 0}
-  developerCommandsEnabled: 1
   endTurn: {fileID: 778547110}
   rerollPieceButton: {fileID: 655719042}
-  whiteButtonHolder: {fileID: 1413341652}
-  whiteRerollButton: {fileID: 6394819514952921870, guid: d6edd623a5626d24c8fd2c9bf084fcc3, type: 3}
-  blackButtonHolder: {fileID: 1399582709}
-  blackRerollButton: {fileID: 562788327565320664, guid: 7fee4e50d563e9245b82ba0f2dcef9e1, type: 3}
+  blackTokenImageHolder: {fileID: 1413341652}
+  blackTokenImage: {fileID: 6394819514952921870, guid: d6edd623a5626d24c8fd2c9bf084fcc3, type: 3}
+  whiteTokenImageHolder: {fileID: 1399582709}
+  whiteTokenImage: {fileID: 562788327565320664, guid: 7fee4e50d563e9245b82ba0f2dcef9e1, type: 3}
   contestHolder: {fileID: 1862133227}
   contestButton: {fileID: 1298940220}
   declineButton: {fileID: 1266187344}
@@ -1704,7 +1703,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnColor:
     m_InternalValue: 0
-  isMultiplayerGame: 0
+  isMultiplayerGame: 1
 --- !u!4 &1255418224
 Transform:
   m_ObjectHideFlags: 0
@@ -2377,7 +2376,7 @@ GameObject:
   - component: {fileID: 1399582711}
   - component: {fileID: 1399582713}
   m_Layer: 5
-  m_Name: BlackTokenHolder
+  m_Name: WhiteTokenHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2555,7 +2554,7 @@ GameObject:
   - component: {fileID: 1413341654}
   - component: {fileID: 1413341656}
   m_Layer: 5
-  m_Name: WhiteTokenHolders
+  m_Name: BlackTokenHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
