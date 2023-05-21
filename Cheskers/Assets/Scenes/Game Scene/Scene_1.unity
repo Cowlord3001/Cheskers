@@ -1666,8 +1666,9 @@ GameObject:
   - component: {fileID: 1255418222}
   - component: {fileID: 1255418223}
   - component: {fileID: 1255418225}
+  - component: {fileID: 1255418226}
   m_Layer: 0
-  m_Name: NetworkController
+  m_Name: Game Controllers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1703,7 +1704,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnColor:
     m_InternalValue: 0
-  isMultiplayerGame: 1
+  isMultiplayerGame: 0
 --- !u!4 &1255418224
 Transform:
   m_ObjectHideFlags: 0
@@ -1729,6 +1730,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 875958fd8a7fb7a4489ed04b6348b036, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1255418226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255418221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1453e2f99993334fbd4aab7237a02d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1266187342

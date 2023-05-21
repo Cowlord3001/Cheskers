@@ -61,6 +61,23 @@ public class Board_Data
                 else boardPieces[x,y] = null;
             }
         }
+        SetRandomVIPs();
+    }
+
+    //TODO: Sync for Multiplayer
+    void SetRandomVIPs()
+    {
+        int whiteVIP = UnityEngine.Random.Range(0, 16);
+        int blackVIP = UnityEngine.Random.Range(0, 16);
+
+        int x = whiteVIP % 8;//row
+        int y = whiteVIP / 8;//col
+        boardPieces[x, y].IsVIP = true;
+
+        x = blackVIP % 8;
+        y = (size - 1) - blackVIP / 8;
+        boardPieces[x, y].IsVIP = true;
+
     }
 
     public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
