@@ -115,7 +115,7 @@ public class Input_Controller : MonoBehaviour
         if (Camera.main == null) { return; }
 
         mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition.x, mouseWorldPosition.y);
+        mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition);
         if (Input.GetMouseButtonDown(0)) {
             float halfWidth = Board_Data.instance.size / 2;
             //Only count clicks on the board to prevent button double clicks

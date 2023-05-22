@@ -13,10 +13,10 @@ public class State_MoveAndUpdate : PlayerTurnState
     public override void RunState()
     {
         if (pieceController.CoinFlip == CAPTURE) {
-            Board_Data.instance.MoveAndTake(pieceController.SelectedPiece, pieceController.DecidedMove.x, pieceController.DecidedMove.y);
+            Board_Data.instance.MoveAndTake(pieceController.SelectedPiece, pieceController.DecidedMove);
         }
         else if (pieceController.CoinFlip == DAMAGE) {
-            Board_Data.instance.MoveAndDamage(pieceController.SelectedPiece, pieceController.DecidedMove.x, pieceController.DecidedMove.y);
+            Board_Data.instance.MoveAndDamage(pieceController.SelectedPiece, pieceController.DecidedMove);
         }
         else {
             Debug.LogWarning("Error: Invalid Coin Flip");

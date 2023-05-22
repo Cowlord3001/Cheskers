@@ -12,8 +12,9 @@ public class ChanceTime_Controller : MonoBehaviour
     {
         for(int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                if (Board_Data.instance.boardPieces[x, y] != null && Board_Data.instance.boardPieces[x, y].IsVIP == false) {
-                    Board_Data.instance.RemovePiece(x, y);
+                Vector2Int position = new Vector2Int(x, y);
+                if (Board_Data.instance.boardPieces[position] != null && Board_Data.instance.boardPieces[position].IsVIP == false) {
+                    Board_Data.instance.RemovePiece(position);
                 }
             }
         }
@@ -24,7 +25,11 @@ public class ChanceTime_Controller : MonoBehaviour
     /// </summary>
     public void ChanceTime2_TeleportationAccident()
     {
+        //Solution overwrite end of turn state to swap pieces.
+        //TODO: Event that calls this for other person... Maybe this controller can have clientRPC's and server runs chancetime.
+        PlayerTurnState newState = new State_EndOfTurn_TeleportingAccident(Piece_Controller.instance);
 
+        Piece_Controller.instance.SwapState(Piece_Controller.PhaseInTurn.END_OF_TURN ,newState);
     }
     /// <summary>
     /// Conformity: The player whose VIP was damaged rolls a d6. This decides the behavior of all pieces for the remainder of the game.

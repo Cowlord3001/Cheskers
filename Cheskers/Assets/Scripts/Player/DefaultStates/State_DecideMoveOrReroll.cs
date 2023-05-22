@@ -14,9 +14,9 @@ public class State_DecideMoveOrReroll : PlayerTurnState
             if (pieceController.DecidedMove == move) {
                 //Starts the first contest
                 pieceController.SetPhaseInTurn( PhaseInTurn.CONTEST );
+                pieceController.AdvanceGame();
             }
         }
 
-        pieceController.AdvanceGame();
     }
 }

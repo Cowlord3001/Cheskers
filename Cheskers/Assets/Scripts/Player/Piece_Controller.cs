@@ -12,7 +12,9 @@ public class Piece_Controller : NetworkBehaviour
 
     //PRIVATE DATA
     Piece_Data selectedPiece;
+    Piece_Data previouslySelectedPiece;
     public Piece_Data SelectedPiece { get { return selectedPiece; } set { selectedPiece = value; } }
+    public Piece_Data PreviouslySelectedPiece { get { return previouslySelectedPiece; } set {  previouslySelectedPiece = value; } }
 
     List<Vector2Int> validMoves;
     public List<Vector2Int> ValidMoves { get { return validMoves; } set { validMoves = value; } }
@@ -42,12 +44,14 @@ public class Piece_Controller : NetworkBehaviour
         WAITING_FOR_TURN
     }
 
+    #region TurnStates
     PlayerTurnState pieceSelection;
     PlayerTurnState pieceConfirmation;
     PlayerTurnState decideMoveOrReroll;
     PlayerTurnState contest;
     PlayerTurnState moveAndUpdate;
     PlayerTurnState endOfTurn;
+
     private void Awake()
     {
         pieceSelection = new State_PieceSelection(this);
@@ -57,6 +61,36 @@ public class Piece_Controller : NetworkBehaviour
         moveAndUpdate = new State_MoveAndUpdate(this);
         endOfTurn = new State_EndOfTurn(this);
     }
+
+    public void SwapState(PhaseInTurn phaseInTurn, PlayerTurnState newState)
+    {
+        switch (phaseInTurn) {
+            case PhaseInTurn.PIECE_SELECTION:
+                pieceSelection = newState;
+                break;
+            case PhaseInTurn.PIECE_CONFIRMATION:
+                pieceConfirmation = newState;
+                break;
+            case PhaseInTurn.DECIDE_MOVE_OR_REROLL:
+                decideMoveOrReroll = newState;
+                break;
+            case PhaseInTurn.CONTEST:
+                contest = newState;
+                break;
+            case PhaseInTurn.MOVE_AND_UPDATE:
+                moveAndUpdate = newState;
+                break;
+            case PhaseInTurn.END_OF_TURN:
+                endOfTurn = newState;
+                break;
+            case PhaseInTurn.WAITING_FOR_TURN:
+                break;
+            default:
+                break;
+        }
+    }
+
+    #endregion
 
 
     //Used by inputcontroller, maybe find a better solution
@@ -115,29 +149,29 @@ public class Piece_Controller : NetworkBehaviour
         }
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
-                Debug.Log("PIECE_SELECTION");
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "PIECE_SELECTION");
                 PieceSelection();
                 break;
             case PhaseInTurn.PIECE_CONFIRMATION:                // DONE
-                Debug.Log("PIECE_CONFIRMATION");
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "PIECE_CONFIRMATION");
                 PieceConfirmation();
                 break;
             case PhaseInTurn.DECIDE_MOVE_OR_REROLL:
-                Debug.Log("DECIDE_MOVE_OR_REROLL");    // DONE
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "DECIDE_MOVE_OR_REROLL");   // DONE
                 DecideMove();
                 break;
             case PhaseInTurn.CONTEST:
-                Debug.Log("CONTEST");
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "CONTEST");
                 Contest();                  // DONE
                 break;
             case PhaseInTurn.MOVE_AND_UPDATE:
-                Debug.Log("MOVE_AND_UPDATE");
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "MOVE_AND_UPDATE");
                 //If this is being called from here it is
                 //local and no contest was needed
                 MoveAndUpdate();        // DONE
                 break;
             case PhaseInTurn.END_OF_TURN:
-                Debug.Log("END_OF_TURN");
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "END_OF_TURN");
                 EndTurn();
                 //For Testing turn back to start of turn
                 rerolled = false;
@@ -175,6 +209,7 @@ public class Piece_Controller : NetworkBehaviour
             UpdateBoardAndPieceGraphics();
             RemoveHighlightOnSelectedPiece();
 
+            previouslySelectedPiece = selectedPiece;
             rerolled = true;
             phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         }
@@ -199,7 +234,7 @@ public class Piece_Controller : NetworkBehaviour
             Destroy(highLightGraphic);
         }
         highLightGraphic = Instantiate(highLightGraphicPrefab, 
-                                           selectedPiece.gameObject.transform.position, 
+                                           Piece_Detection.BoardIndextoWorld(selectedPiece.positionOnBoard), 
                                            Quaternion.identity);
     }
     public void RemoveHighlightOnSelectedPiece()

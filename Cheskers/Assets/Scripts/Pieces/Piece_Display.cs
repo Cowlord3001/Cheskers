@@ -7,14 +7,15 @@ public class Piece_Display : MonoBehaviour
 {
     public static Piece_Display instance;
 
-    public Chess_Move_SO[] chessMoves;
+    [SerializeField] Chess_Move_SO[] chessMoves;
+    Dictionary<Piece_Data.Type, Chess_Move_SO> chessMoves_Dictionary;
+    [SerializeField] Chess_Move_SO noneChessMove;
 
-    public GameObject whitePiece;
-    public GameObject blackPiece;
-    [SerializeField] Sprite blackSprite;
-    [SerializeField] Sprite whiteSprite;
-    [SerializeField] Sprite blackDamagedSprite;
-    [SerializeField] Sprite whiteDamagedSprite;
+    public GameObject whitePiecePrefab;
+    public GameObject blackPiecePrefab;
+
+    List<GameObject> whitePieceGameObjectList;
+    List<GameObject> blackPieceGameObjectList;
 
     public event EventHandler<EventArgsOnPieceTransformed> OnPieceTransformed;
     public class EventArgsOnPieceTransformed { public Piece_Data Piece; public int chessMoveIndex; };
@@ -24,7 +25,15 @@ public class Piece_Display : MonoBehaviour
         instance = this;
         //Creates Board_Data
         Board_Data.instance = new Board_Data();
-        FillBoard_DataWithPieces();
+
+        chessMoves_Dictionary = new Dictionary<Piece_Data.Type, Chess_Move_SO>();
+        for (int i = 0; i < chessMoves.Length; i++) {
+            chessMoves_Dictionary.Add(chessMoves[i].pieceType, chessMoves[i]);
+        }
+        chessMoves_Dictionary.Add(noneChessMove.pieceType, noneChessMove);
+
+
+        SpawnBoardPieces();
     }
 
     private void Start()
@@ -32,21 +41,14 @@ public class Piece_Display : MonoBehaviour
         Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemoved;
         Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
     }
-    void FillBoard_DataWithPieces()
+    void SpawnBoardPieces()
     {
-        //Fill with white or black pieces
-        for (int x = 0; x < Board_Data.instance.size; x++) {
-            for (int y = 0; y < Board_Data.instance.size; y++) {
-                if (Board_Data.instance.boardPieces[x, y] != null) {
-                    if (Board_Data.instance.boardPieces[x, y].GetColor() == Piece_Data.Color.white) {
-                        Board_Data.instance.boardPieces[x, y].gameObject = Instantiate(whitePiece, transform.position, Quaternion.identity);
-                    }
-                    else {
-                        Board_Data.instance.boardPieces[x, y].gameObject = Instantiate(blackPiece, transform.position, Quaternion.identity);
-                    }
-                    Board_Data.instance.boardPieces[x, y].gameObject.transform.parent = transform;
-                }
-            }
+        whitePieceGameObjectList = new List<GameObject>();
+        blackPieceGameObjectList = new List<GameObject>();
+
+        for (int i = 0; i < 16; i++) {
+            whitePieceGameObjectList.Add(Instantiate(whitePiecePrefab, transform));
+            blackPieceGameObjectList.Add(Instantiate(blackPiecePrefab, transform));
         }
 
         UpdatePieces();
@@ -55,46 +57,95 @@ public class Piece_Display : MonoBehaviour
     //Updates the piece display data to game
     public void UpdatePieces()
     {
-        for (int x = 0; x < Board_Data.instance.size; x++) {
-            for (int y = 0; y < Board_Data.instance.size; y++) {
-                if (Board_Data.instance.boardPieces[x, y] != null) {
-                    GameObject go = Board_Data.instance.boardPieces[x, y].gameObject;
-                    go.transform.position = Piece_Detection.BoardIndextoWorld(x, y);
-                    go.GetComponent<SpriteRenderer>().sprite = GetDefaultSprite(Board_Data.instance.boardPieces[x, y].GetColor(), Board_Data.instance.boardPieces[x, y].health);
-                }
+        //Turn off pieces and vip display
+        for (int i = 0; i < 16; i++) {
+            whitePieceGameObjectList[i].SetActive(false);
+            whitePieceGameObjectList[i].transform.GetChild(0).gameObject.SetActive(false);
+            blackPieceGameObjectList[i].SetActive(false);
+            whitePieceGameObjectList[i].transform.GetChild(0).gameObject.SetActive(false);
+        }
+
+        //Loop through board pieces and give each a representation in the game
+        int blackIndex = 0;
+        int whiteIndex = 0;
+        GameObject go;
+        foreach (var piece in Board_Data.instance.pieceList) {
+            //Decide to use black or white
+            if(piece.GetColor() == Piece_Data.Color.white) {
+                go = whitePieceGameObjectList[whiteIndex];
+                whiteIndex++;
             }
+            else {
+                go = blackPieceGameObjectList[blackIndex];
+                blackIndex++;
+            }
+            //Move to correct position with correct sprite.
+            go.transform.position = Piece_Detection.BoardIndextoWorld(piece.positionOnBoard);
+            go.SetActive(true);
+            go.GetComponent<SpriteRenderer>().sprite = GetSprite(piece);
+            if (piece.IsVIP) {
+                go.transform.GetChild(0).gameObject.SetActive(true);
+            }
+            
         }
     }
-    Sprite GetDefaultSprite(Piece_Data.Color color, int health)
+    Sprite GetSprite(Piece_Data piece)
     {
         //TODO: Health could be bigger than 2 in the future
-        switch (color) {
+        switch (piece.GetColor()) {
             case Piece_Data.Color.white:
-                if (health == 1) return whiteDamagedSprite;
-                else return whiteSprite;
+                if (piece.health == 1) return chessMoves_Dictionary[piece.type].spriteWhiteDamaged;
+                else return chessMoves_Dictionary[piece.type].spriteWhiteNoDamage;
             case Piece_Data.Color.black:
-                if (health == 1) return blackDamagedSprite;
-                else return blackSprite;
+                if (piece.health == 1) return chessMoves_Dictionary[piece.type].spriteBlackDamaged;
+                else return chessMoves_Dictionary[piece.type].spriteBlackNoDamage;
             default:
                 return null;
         }
     }
-    public void TransformSelectedPiece(Piece_Data selectedPiece, int chessMoveIndex)
-    {
-        Chess_Move_SO chessMove = chessMoves[chessMoveIndex];
 
-        selectedPiece.gameObject.GetComponent<SpriteRenderer>().sprite =
-                chessMove.GetPieceSprite(selectedPiece.GetColor(), selectedPiece.health);
+    public Chess_Move_SO GetChessMoveByIndex(int i)
+    {
+        return chessMoves[i];
+    }
+    public Chess_Move_SO GetChessMoveByType(Piece_Data.Type type)
+    {
+        return chessMoves_Dictionary[type];
+    }
+
+    GameObject GetGameObjectAtPosition(Piece_Data selectedPiece)
+    {
+        Vector3 targetPosition = Piece_Detection.BoardIndextoWorld(selectedPiece.positionOnBoard);
+        if(selectedPiece.GetColor() == Piece_Data.Color.white) {
+            foreach (GameObject piece in whitePieceGameObjectList) {
+                if(piece.transform.position == targetPosition) {
+                    return piece;
+                }
+            }
+        }
+        else {
+            foreach (GameObject piece in blackPieceGameObjectList) {
+                if (piece.transform.position == targetPosition) {
+                    return piece;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void TransformSelectedPiece(Piece_Data selectedPiece)
+    {
+        GetGameObjectAtPosition(selectedPiece).GetComponent<SpriteRenderer>().sprite = GetSprite(selectedPiece);
 
         EventArgsOnPieceTransformed e = new EventArgsOnPieceTransformed();
         e.Piece = selectedPiece;
-        e.chessMoveIndex = chessMoveIndex;
         
         OnPieceTransformed?.Invoke(this, e);
     }
     void OnPieceRemoved(object sender, Board_Data.EventArgsPieceRemoved e)
     {
-        Destroy(e.removedPiece.gameObject);
+        GetGameObjectAtPosition(e.removedPiece).SetActive(false);//Probably unecessary
+        UpdatePieces();
     }
     void OnPieceDamaged(object sender, Board_Data.EventArgsPieceDamaged e)
     {

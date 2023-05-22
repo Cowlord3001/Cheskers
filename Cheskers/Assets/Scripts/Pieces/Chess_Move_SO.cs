@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "ChessMoveSet")]
@@ -16,21 +17,6 @@ public class Chess_Move_SO : ScriptableObject
     public SlidingMove[] slidingMoves;
 
     
-    public Sprite GetPieceSprite(Piece_Data.Color color, int health)
-    {
-        //Might be copied and pasted need to consolidate
-        switch (color) {
-            case Piece_Data.Color.white:
-                if (health == 1) return spriteWhiteDamaged;
-                else return spriteWhiteNoDamage;
-            case Piece_Data.Color.black:
-                if (health == 1) return spriteBlackDamaged;
-                else return spriteBlackNoDamage;
-            default:
-                return null;
-        }
-    }
-
 }
 
 [System.Serializable]
@@ -47,4 +33,5 @@ public struct SlidingMove
 {
     public int changeInX;
     public int changeInY;
+    public Vector2Int changeInPosition;
 }

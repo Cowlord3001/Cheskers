@@ -16,9 +16,9 @@ public static class Piece_Detection
 
         if (hit.collider == null) return null;
 
-        Vector2Int boardIndicies = WorldtoBoardIndex(mousePosition.x, mousePosition.y);
+        Vector2Int boardIndicies = WorldtoBoardIndex(mousePosition);
 
-        return Board_Data.instance.boardPieces[boardIndicies.x, boardIndicies.y];
+        return Board_Data.instance.boardPieces[boardIndicies];
 
     }
 
@@ -27,31 +27,31 @@ public static class Piece_Detection
         //Get MouseCoordinates -- Move to Input Controller later
         Vector3 mousePosition = Input_Controller.instance.mouseWorldPosition;
 
-        Vector2Int boardIndicies = WorldtoBoardIndex(mousePosition.x, mousePosition.y);
+        Vector2Int boardIndicies = WorldtoBoardIndex(mousePosition);
 
         return boardIndicies;
 
     }
 
-    public static Vector2Int WorldtoBoardIndex(float x, float y)
+    public static Vector2Int WorldtoBoardIndex(Vector3 position)
     {
         Vector2Int BoardIndices = Vector2Int.zero;
         float halfWidth = Board_Data.instance.size / 2;
         float halfTileSize = .5f;
 
-        BoardIndices.x = Mathf.RoundToInt(x + halfWidth - halfTileSize);
-        BoardIndices.y = Mathf.RoundToInt(y + halfWidth - halfTileSize);
+        BoardIndices.x = Mathf.RoundToInt(position.x + halfWidth - halfTileSize);
+        BoardIndices.y = Mathf.RoundToInt(position.y + halfWidth - halfTileSize);
 
         return BoardIndices;
     }
 
-    public static Vector2 BoardIndextoWorld(int boardPositionx, int boardPositiony)
+    public static Vector3 BoardIndextoWorld(Vector2Int boardPosition)
     {
-        Vector2 worldPosition = Vector2.zero;
+        Vector3 worldPosition = Vector3.zero;
         float halfWidth = Board_Data.instance.size / 2;
         float halfTileSize = .5f;
-        worldPosition.x = boardPositionx - halfWidth + halfTileSize;
-        worldPosition.y = boardPositiony - halfWidth + halfTileSize;
+        worldPosition.x = boardPosition.x - halfWidth + halfTileSize;
+        worldPosition.y = boardPosition.y - halfWidth + halfTileSize;
 
         return worldPosition;
     }

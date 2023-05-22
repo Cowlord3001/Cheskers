@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.3731193, g: 0.38073996, b: 0.35872698, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -269,12 +269,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d61dae48f7219b34c891545c1005597a, type: 2}
   - {fileID: 11400000, guid: 7ee74989e6d254845868b933bf028cbc, type: 2}
   - {fileID: 11400000, guid: 8f4c4c13264246840874675ffae038c3, type: 2}
-  whitePiece: {fileID: 3636667184417211457, guid: 4436ef32c185c29439040d469c305a3d, type: 3}
-  blackPiece: {fileID: 8674135343503664730, guid: 7add9cf8020ae074dbca4abad2cc7469, type: 3}
-  blackSprite: {fileID: 21300000, guid: e6969be7dc7d16c40abd10649f0fe1a9, type: 3}
-  whiteSprite: {fileID: 21300000, guid: ec9bc38497d43e44eb13191125517111, type: 3}
-  blackDamagedSprite: {fileID: 21300000, guid: 3e4349bdc8447c044b14651750e1faca, type: 3}
-  whiteDamagedSprite: {fileID: 21300000, guid: 366ecb732fac65b4a8de4c23bc465e83, type: 3}
+  noneChessMove: {fileID: 11400000, guid: bd70fb749dba58c4ba3e70e6490c7fcc, type: 2}
+  whitePiecePrefab: {fileID: 3636667184417211457, guid: 4436ef32c185c29439040d469c305a3d, type: 3}
+  blackPiecePrefab: {fileID: 8674135343503664730, guid: 7add9cf8020ae074dbca4abad2cc7469, type: 3}
 --- !u!1 &48282108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1667,6 +1664,8 @@ GameObject:
   - component: {fileID: 1255418223}
   - component: {fileID: 1255418225}
   - component: {fileID: 1255418226}
+  - component: {fileID: 1255418227}
+  - component: {fileID: 1255418228}
   m_Layer: 0
   m_Name: Game Controllers
   m_TagString: Untagged
@@ -1744,6 +1743,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1453e2f99993334fbd4aab7237a02d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1255418227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255418221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c15289840fc43140970ce2f2ba59e96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetFrameRate: 60
+--- !u!114 &1255418228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1255418221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd46ed582f34c50449122f999abb6d11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugBools:
+  - type: 0
+    value: 0
+  - type: 2
+    value: 0
+  - type: 1
+    value: 0
 --- !u!1 &1266187342
 GameObject:
   m_ObjectHideFlags: 0

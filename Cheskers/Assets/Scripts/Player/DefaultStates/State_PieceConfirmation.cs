@@ -15,17 +15,18 @@ public class State_PieceConfirmation : PlayerTurnState
 
             if (pieceController.SelectedPiece == pieceData) {
                 //Select Piece
+                pieceController.SelectedPiece.type = Piece_Data.Type.none;
                 pieceController.SelectedPiece = pieceData;
 
                 //Get a random move
-                int randomChessMoveIndex = UnityEngine.Random.Range(0, Piece_Display.instance.chessMoves.Length);
-                Chess_Move_SO chessMove = Piece_Display.instance.chessMoves[randomChessMoveIndex];
+                int randomChessMoveIndex = UnityEngine.Random.Range(0, 6);
+                Chess_Move_SO chessMove = Piece_Display.instance.GetChessMoveByIndex(randomChessMoveIndex);
 
                 //Generate a randomMove and update piece display
                 pieceController.ValidMoves = Board_Data.instance.getAllLegalMoves(pieceController.SelectedPiece, chessMove);
 
                 //Update Display for board and pieces
-                Piece_Display.instance.TransformSelectedPiece(pieceController.SelectedPiece, randomChessMoveIndex);
+                Piece_Display.instance.TransformSelectedPiece(pieceController.SelectedPiece);
                 Board_Display.instance.HighLightPossibleMoves(pieceController.ValidMoves);
 
                 pieceController.SetPhaseInTurn( PhaseInTurn.DECIDE_MOVE_OR_REROLL);

@@ -9,10 +9,14 @@ public class State_EndOfTurn : PlayerTurnState
 
     public override void RunState()
     {
-        pieceController.UpdateBoardAndPieceGraphics();
         pieceController.Rerolled = false;
         pieceController.SetPhaseInTurn( PhaseInTurn.WAITING_FOR_TURN );
+        pieceController.SelectedPiece.type = Piece_Data.Type.none;
 
+        if(pieceController.PreviouslySelectedPiece != null)
+            pieceController.PreviouslySelectedPiece.type = Piece_Data.Type.none;
+
+        pieceController.UpdateBoardAndPieceGraphics();
         pieceController.SendEndOfTurnEvent();
     }
 }

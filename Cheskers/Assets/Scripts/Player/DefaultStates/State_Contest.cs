@@ -10,8 +10,8 @@ public class State_Contest : PlayerTurnState
 
     public override void RunState()
     {
-        if (Board_Data.instance.boardPieces[pieceController.DecidedMove.x, pieceController.DecidedMove.y] == null ||
-            Board_Data.instance.boardPieces[pieceController.DecidedMove.x, pieceController.DecidedMove.y].health == 1) {
+        if (Board_Data.instance.boardPieces[pieceController.DecidedMove] == null ||
+            Board_Data.instance.boardPieces[pieceController.DecidedMove].health == 1) {
             //Skip Contest Phase
             pieceController.CoinFlip = UnityEngine.Random.Range(0, 2);
             pieceController.SetPhaseInTurn(PhaseInTurn.MOVE_AND_UPDATE);
