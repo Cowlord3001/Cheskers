@@ -10,9 +10,8 @@ public class Board_Data
 
     public string debugMessage;
     /// <summary>
-    /// This is a 2 dimensional array of the contents of all positions on the board
+    /// This is a dictionary linking vector2Int positions to pieces. values null if not accepted
     /// </summary>
-    //public Piece_Data[,] boardPieces { get; private set; }
     public Dictionary<Vector2Int, Piece_Data> boardPieces { get; private set; }
     public int size { get; private set; }
 

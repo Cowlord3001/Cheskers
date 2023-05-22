@@ -19,8 +19,7 @@ public class State_PieceConfirmation : PlayerTurnState
                 pieceController.SelectedPiece = pieceData;
 
                 //Get a random move
-                int randomChessMoveIndex = UnityEngine.Random.Range(0, 6);
-                Chess_Move_SO chessMove = Piece_Display.instance.GetChessMoveByIndex(randomChessMoveIndex);
+                Chess_Move_SO chessMove = PickChessMove();
 
                 //Generate a randomMove and update piece display
                 pieceController.ValidMoves = Board_Data.instance.getAllLegalMoves(pieceController.SelectedPiece, chessMove);
@@ -35,5 +34,11 @@ public class State_PieceConfirmation : PlayerTurnState
                 pieceController.PieceSelection();
             }
         }
+    }
+
+    protected virtual Chess_Move_SO PickChessMove()
+    {
+        int randomChessMoveIndex = UnityEngine.Random.Range(0, 6);
+        return Piece_Display.instance.GetChessMoveByIndex(randomChessMoveIndex);
     }
 }

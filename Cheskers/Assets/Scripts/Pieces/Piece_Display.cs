@@ -62,7 +62,7 @@ public class Piece_Display : MonoBehaviour
             whitePieceGameObjectList[i].SetActive(false);
             whitePieceGameObjectList[i].transform.GetChild(0).gameObject.SetActive(false);
             blackPieceGameObjectList[i].SetActive(false);
-            whitePieceGameObjectList[i].transform.GetChild(0).gameObject.SetActive(false);
+            blackPieceGameObjectList[i].transform.GetChild(0).gameObject.SetActive(false);
         }
 
         //Loop through board pieces and give each a representation in the game

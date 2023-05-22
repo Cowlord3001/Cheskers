@@ -18,6 +18,7 @@ public class ChanceTime_Controller : MonoBehaviour
                 }
             }
         }
+        Piece_Display.instance.UpdatePieces();
     }
     /// <summary>
     /// 2. Teleportation Accident: A player’s VIP randomly swaps places with another piece at the start of their turn.
@@ -36,21 +37,37 @@ public class ChanceTime_Controller : MonoBehaviour
     /// </summary>
     public void ChanceTime3_Comformity()
     {
+        Piece_Data.Type[] types = {Piece_Data.Type.pawn, Piece_Data.Type.knight, Piece_Data.Type.queen,
+                                   Piece_Data.Type.king, Piece_Data.Type.rook, Piece_Data.Type.bishop};
 
+        int typeIndex = Random.Range(0, types.Length);
+
+        PlayerTurnState newState = new State_PieceConfirmation_Comformity (Piece_Controller.instance, types[typeIndex]);
+
+        Piece_Controller.instance.SwapState(Piece_Controller.PhaseInTurn.PIECE_CONFIRMATION , newState);
+
+        //TODO: Override Pieces to all look like the right type.
     }
     /// <summary>
     /// Foreign Exchange: The VIPs immediately switch places.
     /// </summary>
     public void ChanceTime4_ForeignExchange()
     {
+        List<Piece_Data> VIPlist = new List<Piece_Data>();
 
+        foreach (var piece in Board_Data.instance.pieceList) {
+            if(piece.IsVIP)
+                VIPlist.Add (piece);
+        }
+
+        Board_Data.instance.SwapPiecesExternal(VIPlist[0], VIPlist[1]);
     }
     /// <summary>
     /// Thorns II: Whenever a piece is attacked, the attacker is damaged.
     /// </summary>
     public void ChanceTime5_ThornsII()
     {
-
+        //Override Functions in Board controller
     }
     /// <summary>
     /// Duel: Coin flips are now changed to games of Rock, Paper, Scissors between players.
