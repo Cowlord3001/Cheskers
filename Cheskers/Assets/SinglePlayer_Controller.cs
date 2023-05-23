@@ -47,7 +47,7 @@ public class SinglePlayer_Controller : MonoBehaviour
         decline2 = false;
         Input_Controller.instance.UpdateDisplayBasedOnCoinFlip(coinFlip);
 
-        Debug.Log("New Contest Started");
+        //Debug.Log("New Contest Started");
         //Debug.Log("WHITE: " + Input_Controller.instance.whiteButtonHolder.transform.childCount);
         //Debug.Log("BLACK: " + Input_Controller.instance.blackButtonHolder.transform.childCount);
 
@@ -55,12 +55,12 @@ public class SinglePlayer_Controller : MonoBehaviour
         if (Input_Controller.instance.WhitePlayerHasTokens() == false) {
             //Simulate pressing decline button
             Input_Controller.instance.ButtonPressedDecline();
-            Debug.Log("Simulating white button decline");
+            //Debug.Log("Simulating white button decline");
         }
         if (Input_Controller.instance.BlackPlayerHasTokens() == false) {
             //Simulate pressing decline button
             Input_Controller.instance.Button2PressedDecline();
-            Debug.Log("Simulating black button decline");
+            //Debug.Log("Simulating black button decline");
         }
     }
 

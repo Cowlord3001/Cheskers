@@ -52,7 +52,7 @@ public class Input_Controller : MonoBehaviour
 
     [SerializeField] Text contestText;
     [SerializeField] Text contest2Text;
-
+    #region TokenTracking
     /// <summary>
     /// White Tokens are owned by the black player
     /// </summary>
@@ -62,6 +62,55 @@ public class Input_Controller : MonoBehaviour
     /// </summary>
     int blackTokens = 0;
 
+    public int GetBlackTokenNumber(){ return blackTokens;}
+    public int GetWhiteTokenNumber(){ return whiteTokens;}
+
+    public void ClearTokens()
+    {
+        for (int i = 0; i < whiteTokens; i++) {
+            RemoveWhiteToken();
+        }
+
+        for (int i = 0; i < blackTokens; i++) {
+            RemoveBlackToken();
+        }
+    }
+
+    /// <summary>
+    /// Gives a token to the player with the corrsponding color.
+    /// </summary>
+    /// <param name="color"></param>
+    public void GiveContestToken(Piece_Data.Color color)
+    {
+        //You can't get a token if its the other players turn.
+        //If its white's turn and they lose a piece to something like thorns black should not get a token
+        //if color does not equal the turn color no token given
+        //This is called from remove piece events and needs protection
+        if(Network_Controller.instance.isMultiplayerGame) {
+            //multiplayer
+            if (color != Network_Controller.instance.turnColor.Value) return;
+        }
+        else {
+            //single player
+            if (color != Piece_Controller.instance.GetColor()) return;
+        }
+
+        GiveToken(color);
+    }
+
+    public void GiveToken(Piece_Data.Color color)
+    {
+        if (color == Piece_Data.Color.white) {
+            GameObject go = Instantiate(blackTokenImage, blackTokenImageHolder.transform);
+            blackTokens++;
+        }
+        else {
+            GameObject go = Instantiate(whiteTokenImage, whiteTokenImageHolder.transform);
+            whiteTokens++;
+        }
+    }
+
+    #endregion
     private void Awake()
     {
         instance = this;
@@ -80,7 +129,7 @@ public class Input_Controller : MonoBehaviour
         declineButton.onClick.AddListener(() => ButtonPressedDecline());
         if (Network_Controller.instance.isMultiplayerGame == true) { return; }
 
-        Debug.Log("Setting up second contest buttons");
+        //Debug.Log("Setting up second contest buttons");
         contest2Button.onClick.AddListener(() => Button2PressedContest());
         decline2Button.onClick.AddListener(() => Button2PressedDecline());
     }
@@ -160,21 +209,6 @@ public class Input_Controller : MonoBehaviour
         whiteTokens--;
         Destroy(whiteTokenImageHolder.transform.GetChild(0).gameObject);
     }
-    /// <summary>
-    /// Gives a token to the player with the corrsponding color.
-    /// </summary>
-    /// <param name="color"></param>
-    public void GiveContestToken(Piece_Data.Color color)
-    {
-        if (color == Piece_Data.Color.white) {
-            GameObject go = Instantiate(blackTokenImage, blackTokenImageHolder.transform);
-            blackTokens++;
-        }
-        else {
-            GameObject go = Instantiate(whiteTokenImage, whiteTokenImageHolder.transform);
-            whiteTokens++;
-        }
-    }
     void ButtonPressedReroll()
     {
         OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
@@ -219,7 +253,7 @@ public class Input_Controller : MonoBehaviour
     }
     public void Button2PressedDecline()
     {
-        Debug.Log("Decline Button 2 Pressed Input");
+        //Debug.Log("Decline Button 2 Pressed Input");
         //Color green after pressed for visual feedback
         ColorBlock colorBlock = decline2Button.colors;
         colorBlock.normalColor = Color.green;

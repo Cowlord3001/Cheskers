@@ -8,7 +8,8 @@ public class Debug_Manager : MonoBehaviour
     {
         PlayerCurrentState,
         TurnStateMessages,
-        NetworkEvents
+        NetworkEvents,
+        BoardFunctions
     }
 
     public static Debug_Manager instance;
@@ -25,6 +26,11 @@ public class Debug_Manager : MonoBehaviour
         foreach (var debugBool in debugBools) {
             debugBool_Dictionary.Add(debugBool.type, debugBool.value);
         }
+    }
+
+    public void LogOverride(string msg)
+    {
+        Debug.Log(msg);
     }
 
     public void Log(type debugType, string msg)

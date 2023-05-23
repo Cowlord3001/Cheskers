@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Board_Data
 {
@@ -35,17 +36,36 @@ public class Board_Data
         public Vector2Int pieceEndBoardCordintaes;
     }
 
-    public List<Piece_Data> pieceList { get; private set; }
+    ///public List<Piece_Data> pieceList { get; private set; }
     public List<Piece_Data> GetPieces()
     {
+        List<Piece_Data> pieceList= new List<Piece_Data>();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (boardPieces[new Vector2Int(x,y)] != null) {
+                    pieceList.Add(boardPieces[new Vector2Int(x, y)]);
+                }
+            }
+        }
+
         return pieceList;
     }
+    //public void ResetPieceList()
+    //{
+    //    pieceList = new List<Piece_Data>();
+    //}
 
-    //TODO: Add Event for piece moved
-    const int MOVING_TO_EMPTY = 0;
-    const int MOVING_TO_ENEMYPIECE = 1;
-    const int MOVING_TO_ILLIGAL_SPACE = 2;
-    List<Vector2Int> boardPositions;
+    public int MOVING_TO_EMPTY = 0;
+    public int MOVING_TO_ENEMYPIECE = 1;
+    public int MOVING_TO_ILLIGAL_SPACE = 2;
+    public List<Vector2Int> boardPositions;
+
+    /// <summary>
+    /// This Function will Move a piece and damage it's target. Can be overriden during chance time.
+    /// </summary>
+    public BoardFunction_MoveAndDamage boardFunction_moveAndDamage;
+    public BoardFunction_MoveAndTake boardFunction_moveAndTake;
+
     public Board_Data()
     {
         debugMessage = "";
@@ -53,7 +73,6 @@ public class Board_Data
         //boardPieces = new Piece_Data[size, size];
         boardPositions = new List<Vector2Int>();
         boardPieces = new Dictionary<Vector2Int, Piece_Data> ();
-        pieceList = new List<Piece_Data>();
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
@@ -64,11 +83,9 @@ public class Board_Data
                 if (y <= 1) {
                     //boardPieces[x, y] = new Piece_Data(Piece_Data.Color.white, new Vector2Int(x, y));
                     boardPieces.Add(position, new Piece_Data(Piece_Data.Color.white, position));
-                    pieceList.Add(boardPieces[position]);
                 }
                 else if (y >= size - 2) {
                     boardPieces.Add(position, new Piece_Data(Piece_Data.Color.black, position));
-                    pieceList.Add(boardPieces[position]);
                     //boardPieces[x, y] = new Piece_Data(Piece_Data.Color.black, new Vector2Int(x, y));
                     //pieceList.Add(boardPieces[x, y]);
                 }
@@ -77,9 +94,15 @@ public class Board_Data
                 }
             }
         }
-        
 
+        InitializeBoardFunctions();
         SetRandomVIPs();
+    }
+
+    void InitializeBoardFunctions()
+    {
+        boardFunction_moveAndDamage = new BoardFunction_MoveAndDamage();
+        boardFunction_moveAndTake = new BoardFunction_MoveAndTake();
     }
 
     const string NEXTPIECE = "_";
@@ -100,14 +123,12 @@ public class Board_Data
                     boardState += boardPieces[new Vector2Int(x, y)].GetPieceString();
             }
         }
-
         return boardState;
     }
 
     public void SetBoardFromStringState(string stringState)
     {
         String[] Lines = stringState.Split(NEXTLINE);
-        pieceList = new List<Piece_Data>();
         int y = 0;
         foreach (string line in Lines) {
             int x = 0;
@@ -115,7 +136,6 @@ public class Board_Data
             foreach (string piece in stringPieces) {
                 if (piece != BLANK) {
                     boardPieces[new Vector2Int(x,y)] = new Piece_Data(piece, new Vector2Int(x, y));
-                    pieceList.Add(boardPieces[new Vector2Int(x, y)]);
                 }
                 else {
                     boardPieces[new Vector2Int(x, y)] = null;
@@ -139,7 +159,6 @@ public class Board_Data
         x = blackVIP % 8;
         y = (size - 1) - blackVIP / 8;
         boardPieces[new Vector2Int(x, y)].IsVIP = true;
-
     }
 
     public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
@@ -268,55 +287,29 @@ public class Board_Data
         //TODO: Detect en pessant
         return ExtraMoves;
     }
+    public void MoveAndTake(Piece_Data piece, Vector2Int newPosition)
+    {
+        boardFunction_moveAndTake.MoveAndTake(piece, newPosition);
+    }
 
     public void MoveAndDamage(Piece_Data piece, Vector2Int newPosition)
     {
-        if (boardPieces[newPosition] == null) {
-            MovePiece(piece, newPosition);
-            ResetPieceType(piece);
-            return;
-        }
-        if(boardPieces[newPosition].health == 1) {
-            MoveAndTake(piece, newPosition);
-            ResetPieceType(piece);
-            return;
-        }
-        if(piece.type == Piece_Data.Type.knight ||
-           piece.type == Piece_Data.Type.pawn   ||
-           piece.type == Piece_Data.Type.king) {
-           DamagePiece(newPosition);
-        }
-        else {
-            //Calculate where to land.
-            Vector2Int deltaPosition = newPosition - piece.positionOnBoard;
-            if(deltaPosition.x != 0)
-                deltaPosition.x = deltaPosition.x / Mathf.Abs(deltaPosition.x);
-            if(deltaPosition.y != 0)
-                deltaPosition.y = deltaPosition.y / Mathf.Abs(deltaPosition.y);
-            if(newPosition - deltaPosition == piece.positionOnBoard)
-            {
-
-            }
-            else
-            {
-                MovePiece(piece, newPosition - deltaPosition);
-            }
-
-            DamagePiece(newPosition);
-        }
-        ResetPieceType(piece);
+        boardFunction_moveAndDamage.MoveAndDamage(piece, newPosition);
     }
 
     public void DamagePiece(Vector2Int positionToDamage)
     {
         boardPieces[positionToDamage].health--;
-        //TODO: check for death maybe?
+        if(boardPieces[positionToDamage].health == 0) {
+            RemovePiece(positionToDamage);
+        }
+
         EventArgsPieceDamaged e = new EventArgsPieceDamaged();
         e.damagedPiece = boardPieces[positionToDamage];
         OnPieceDamaged(this, e);
     }
 
-    private void MovePiece(Piece_Data piece, Vector2Int newPosition)
+    public void MovePiece(Piece_Data piece, Vector2Int newPosition)
     {
         EventArgsPieceMoved e = new EventArgsPieceMoved();
         e.pieceStartBoardCordintaes = piece.positionOnBoard;
@@ -329,7 +322,7 @@ public class Board_Data
         piece.positionOnBoard = newPosition;
     }
 
-    void ResetPieceType(Piece_Data piece)
+    public void ResetPieceType(Piece_Data piece)
     {
         piece.type = Piece_Data.Type.none;
     }
@@ -350,29 +343,6 @@ public class Board_Data
         piece2.positionOnBoard = piece1.positionOnBoard;
         piece1.positionOnBoard = piece2Position;
     }
-
-    public bool MoveAndTake(Piece_Data piece, Vector2Int newPosition)
-    {
-
-        int moveValidateResult = ValidMove(piece.GetColor(), newPosition);
-        //If move is illigal return false for failed move shouldnt happen
-        if (moveValidateResult == MOVING_TO_ILLIGAL_SPACE) return false;
-
-        piece.hasMoved = true;
-
-        if (moveValidateResult == MOVING_TO_ENEMYPIECE) {
-            RemovePiece(newPosition);
-            MovePiece(piece, newPosition);
-        }
-
-        //Moving to EmptySpace
-        if(moveValidateResult == MOVING_TO_EMPTY) {
-            MovePiece(piece, newPosition);
-        }
-        ResetPieceType(piece);
-        return true;
-    }
-
     public void RemovePiece(Vector2Int removePosition)
     {
         //Fire Remove Piece Event
@@ -380,11 +350,10 @@ public class Board_Data
         e.removedPiece = boardPieces[removePosition];
         OnPieceRemovedFromBoard?.Invoke(this, e);
 
-        pieceList.Remove(e.removedPiece);
         boardPieces[removePosition] = null;
     }
 
-    private int ValidMove(Piece_Data.Color color, Vector2Int newPosition)
+    public int ValidMove(Piece_Data.Color color, Vector2Int newPosition)
     {
         if(boardPieces.ContainsKey(newPosition) == false) {
             return MOVING_TO_ILLIGAL_SPACE;

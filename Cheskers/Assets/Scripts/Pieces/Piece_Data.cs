@@ -37,7 +37,8 @@ public class Piece_Data
     const char DAMAGED = 'D';
     const char MOVED = 'M';
     const char NOT = 'N';
-
+    //WVDM white piece that has been damaged and moved
+    //WNNN white piece that is not the VIP and has not moved and has not been damaged
     public Piece_Data(string stringCode, Vector2Int positionOnBoard)
     {
         this.positionOnBoard = positionOnBoard;

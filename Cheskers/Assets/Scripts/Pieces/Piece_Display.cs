@@ -69,7 +69,7 @@ public class Piece_Display : MonoBehaviour
         int blackIndex = 0;
         int whiteIndex = 0;
         GameObject go;
-        foreach (var piece in Board_Data.instance.pieceList) {
+        foreach (var piece in Board_Data.instance.GetPieces()) {
             //Decide to use black or white
             if(piece.GetColor() == Piece_Data.Color.white) {
                 go = whitePieceGameObjectList[whiteIndex];
