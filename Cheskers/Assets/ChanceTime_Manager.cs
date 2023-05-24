@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.XR;
 
 public class ChanceTime_Manager : MonoBehaviour
 {
@@ -229,5 +232,96 @@ public class ChanceTime_Manager : MonoBehaviour
     public void ChanceTime10_Defectors()
     {
         //Another Override to End of Turn state
+    }
+
+    /// <summary>
+    /// At the start of each turn, the player must choose one of their pieces to take damage.
+    /// The opposing player can expend a piece from their hand to make them choose a different piece(this can only happen once per turn).
+    /// </summary>
+    public void ChanceTime11_SpntaneousCombustion()
+    {
+        //First part not too bad, needs a graphic and an override to end of turn state. 
+        //Second part needs to prompt the other player to accept or reject the choice.(new ui)
+    }
+
+    /// <summary>
+    /// Roll a d6 for each of your pieces. This decides their behavior for the remainder of the game.
+    /// </summary>
+    public void ChanceTime12_ChessRules()
+    {
+        //Easy if there is no checkmate. Need to override transform piece part of piece confirmation state
+    }
+
+    /// <summary>
+    /// Flip a coin: heads = black, tails = white. Move each of your pieces to the nearest square of this color (player’s choice).
+    /// </summary>
+    public void ChanceTime13_CheckersRules()
+    {
+        //Need to implment checkers rules into the game? look up checkers
+    }
+
+    /// <summary>
+    /// Roll a d6 for each of your pieces. This decides their behavior for the remainder of the game.
+    /// Flip a coin: heads = black, tails = white.If a piece is currently on a square of this color, you can instead move it like a checkers piece.
+    /// </summary>
+    public void ChaceTime14_EverythingRules()
+    {
+        //need to implement checkers rules and override some board functions
+    }
+
+    /// <summary>
+    ///  Some spaces are now pitfalls. Roll 1d4 and consult the table below to decide their arrangement (red = pitfall).
+    /// Only a knight can cross a pitfall, and any pieces present on a pitfall when it appears is damaged and moved to the nearest available space(player’s choice).
+    /// </summary>
+    public void ChanceTime15_Pitfall()
+    {
+        //Need to override move in some way to check the path a piece travels.
+    }
+
+    /// <summary>
+    /// The VIPs are enlarged to be 2x2 pieces, “pushing” any pieces in their space (player’s choice on which directions they expand).
+    /// Each VIP has 4 health(or 2 if previously damaged), can attack up to 4 pieces in one move, and turn back to 1x1 pieces if they collide with the other VIP.
+    /// </summary>
+    public void ChanceTime16_SupresizeMe()
+    {
+        //Not sure how this should be done yet
+    }
+
+    /// <summary>
+    ///  All the opponent’s pieces must be eliminated to win. The VIP is no longer the target.
+    /// </summary>
+    public void ChanceTime17_Completionist()
+    {
+        //Need to implement chance time detection in the code. This function that detects end of game states will be override by completionist
+    }
+
+    /// <summary>
+    ///  The VIPs now wield guns, allowing them to attack any piece within line of sight 
+    ///  (I.e. the first piece in each of the 4 cardinal directions). They do not travel to this piece.
+    /// </summary>
+    public void ChanceTime18_Gun()
+    {
+        //Not too bad need to override valid moves to add more moves for the vip
+    }
+    /// <summary>
+    ///  Recursion: The game restarts, with the board reduced to 6x6 and the number of pieces to 12 each.
+    /// If this occurs again, the board is reduced to 4x4 and the number of pieces to 8 each.If this occurs a third time, 
+    /// God is dead and Cheskers killed him.
+    /// </summary>
+    public void ChanceTime19_Recursion()
+    {
+        //Might be ok, dictionary makes this easier in some ways. I think I used 8 in some parts of the code recently.
+        //everything else runes off of the variable size in board data so it should be easy. I think I used 8 when looping through
+        //pieces in some chance time functions
+    }
+
+    /// <summary>
+    /// 20. Cataclysm: At the start of each round, a different Chance Time event is rolled. 
+    /// This is overridden (if possible) at the start of the next round.
+    /// </summary>
+    public void ChanceTime20_Cataclysm()
+    {
+        //Need a reset rules function and then this will be easy to random between the other states. 
+        //Make reset rules once we are clear all that needs to be overriden.
     }
 }
