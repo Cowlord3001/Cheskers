@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class Piece_Controller : NetworkBehaviour
+public class Turn_Manager : NetworkBehaviour
 {
     //Graphics
     [SerializeField] GameObject highLightGraphicPrefab;
     GameObject highLightGraphic;
 
     //PRIVATE DATA
-    Piece_Data selectedPiece;
-    Piece_Data previouslySelectedPiece;
-    public Piece_Data SelectedPiece { get { return selectedPiece; } set { selectedPiece = value; } }
-    public Piece_Data PreviouslySelectedPiece { get { return previouslySelectedPiece; } set {  previouslySelectedPiece = value; } }
+    Piece selectedPiece;
+    Piece previouslySelectedPiece;
+    public Piece SelectedPiece { get { return selectedPiece; } set { selectedPiece = value; } }
+    public Piece PreviouslySelectedPiece { get { return previouslySelectedPiece; } set {  previouslySelectedPiece = value; } }
 
     List<Vector2Int> validMoves;
     public List<Vector2Int> ValidMoves { get { return validMoves; } set { validMoves = value; } }
@@ -26,13 +26,13 @@ public class Piece_Controller : NetworkBehaviour
     public bool Rerolled { set { rerolled = value; } get { return rerolled; } }
 
     //PUBLIC DATA
-    public static Piece_Controller instance;
+    public static Turn_Manager instance;
     //Host sets themself to white so default color is black
-    Piece_Data.Color color = Piece_Data.Color.black;
-    public Piece_Data.Color GetColor() { return color; }
+    Piece.Color color = Piece.Color.black;
+    public Piece.Color GetColor() { return color; }
 
-    public Piece_Data.Color GetPlayerColor() { return color; }
-    public void SetPlayerColor(Piece_Data.Color newColor) { color = newColor; }
+    public Piece.Color GetPlayerColor() { return color; }
+    public void SetPlayerColor(Piece.Color newColor) { color = newColor; }
     public enum PhaseInTurn
     {
         PIECE_SELECTION,
@@ -111,21 +111,21 @@ public class Piece_Controller : NetworkBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (Network_Controller.instance.isMultiplayerGame == true) {
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) {
             if (IsOwner == false) return;
             phaseInTurn = PhaseInTurn.WAITING_FOR_TURN;
         }
         else {
             //Not Multiplayer
-            color = Piece_Data.Color.white;
+            color = Piece.Color.white;
             phaseInTurn = PhaseInTurn.PIECE_SELECTION;
         }
         instance = this;
 
 
-        Input_Controller.instance.OnLeftMouseClick += OnLeftMouseClick;
-        Input_Controller.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
-        Input_Controller.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
+        Input_Manager.instance.OnLeftMouseClick += OnLeftMouseClick;
+        Input_Manager.instance.OnRollAgainButtonClicked += OnRollAgainPressed;
+        Input_Manager.instance.OnEndTurnButtonClicked += OnEndTurnPressed;
         //Input_Controller.instance.OnContestButtonClicked += OnContestPressed;
         //Input_Controller.instance.OnDeclineButtonClicked += OnDeclinePressed;
     }
@@ -134,18 +134,18 @@ public class Piece_Controller : NetworkBehaviour
     //Event only fires on mouseclicks on the board
     void OnLeftMouseClick(object sender, EventArgs e)
     {
-        if (Network_Controller.instance.isMultiplayerGame == true) {
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) {
             if (IsOwner == false) return;
-            if (Network_Controller.instance.turnColor.Value != color) { return; }
+            if (Multiplayer_Manager.instance.turnColor.Value != color) { return; }
         }
 
         AdvanceGame();
     }
     public void AdvanceGame()
     {
-        if (Network_Controller.instance.isMultiplayerGame == true) {
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) {
             if (IsOwner == false) return;
-            if (Network_Controller.instance.turnColor.Value != color) { return; }
+            if (Multiplayer_Manager.instance.turnColor.Value != color) { return; }
         }
         switch (phaseInTurn) {
             case PhaseInTurn.PIECE_SELECTION:                   // DONE
@@ -195,7 +195,7 @@ public class Piece_Controller : NetworkBehaviour
     {
         this.coinFlip = coinFlip;
         //Called by network controller to progress the game.
-        Input_Controller.instance.TurnOffContestHolders();
+        Input_Manager.instance.TurnOffContestHolders();
         if (phaseInTurn == PhaseInTurn.CONTEST) {
             phaseInTurn = PhaseInTurn.MOVE_AND_UPDATE;
             AdvanceGame();
@@ -205,7 +205,7 @@ public class Piece_Controller : NetworkBehaviour
     void OnRollAgainPressed(object sender, EventArgs e)
     {
         if (phaseInTurn == PhaseInTurn.DECIDE_MOVE_OR_REROLL && 
-           (rerolled == false || Input_Controller.developerCommandsEnabled)) {
+           (rerolled == false || Input_Manager.developerCommandsEnabled)) {
             UpdateBoardAndPieceGraphics();
             RemoveHighlightOnSelectedPiece();
 
@@ -222,8 +222,8 @@ public class Piece_Controller : NetworkBehaviour
 
     public void UpdateBoardAndPieceGraphics()
     {
-        Board_Display.instance.RemoveHighLightPossibleMoves(validMoves);
-        Piece_Display.instance.UpdatePieces();
+        BoardDisplay_Manager.instance.RemoveHighLightPossibleMoves(validMoves);
+        PieceDisplay_Manager.instance.UpdatePieces();
         RemoveHighlightOnSelectedPiece();
     }
 

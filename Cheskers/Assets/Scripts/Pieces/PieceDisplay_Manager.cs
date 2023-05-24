@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Piece_Display : MonoBehaviour
+public class PieceDisplay_Manager : MonoBehaviour
 {
-    public static Piece_Display instance;
+    public static PieceDisplay_Manager instance;
 
     [SerializeField] Chess_Move_SO[] chessMoves;
-    Dictionary<Piece_Data.Type, Chess_Move_SO> chessMoves_Dictionary;
+    Dictionary<Piece.Type, Chess_Move_SO> chessMoves_Dictionary;
     [SerializeField] Chess_Move_SO noneChessMove;
 
     public GameObject whitePiecePrefab;
@@ -18,15 +18,15 @@ public class Piece_Display : MonoBehaviour
     List<GameObject> blackPieceGameObjectList;
 
     public event EventHandler<EventArgsOnPieceTransformed> OnPieceTransformed;
-    public class EventArgsOnPieceTransformed { public Piece_Data Piece; public int chessMoveIndex; };
+    public class EventArgsOnPieceTransformed { public Piece Piece; public int chessMoveIndex; };
 
     private void Awake()
     {
         instance = this;
         //Creates Board_Data
-        Board_Data.instance = new Board_Data();
+        Board.instance = new Board();
 
-        chessMoves_Dictionary = new Dictionary<Piece_Data.Type, Chess_Move_SO>();
+        chessMoves_Dictionary = new Dictionary<Piece.Type, Chess_Move_SO>();
         for (int i = 0; i < chessMoves.Length; i++) {
             chessMoves_Dictionary.Add(chessMoves[i].pieceType, chessMoves[i]);
         }
@@ -38,8 +38,8 @@ public class Piece_Display : MonoBehaviour
 
     private void Start()
     {
-        Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemoved;
-        Board_Data.instance.OnPieceDamaged += OnPieceDamaged;
+        Board.instance.OnPieceRemovedFromBoard += OnPieceRemoved;
+        Board.instance.OnPieceDamaged += OnPieceDamaged;
     }
     void SpawnBoardPieces()
     {
@@ -69,9 +69,9 @@ public class Piece_Display : MonoBehaviour
         int blackIndex = 0;
         int whiteIndex = 0;
         GameObject go;
-        foreach (var piece in Board_Data.instance.GetPieces()) {
+        foreach (var piece in Board.instance.GetPieces()) {
             //Decide to use black or white
-            if(piece.GetColor() == Piece_Data.Color.white) {
+            if(piece.GetColor() == Piece.Color.white) {
                 go = whitePieceGameObjectList[whiteIndex];
                 whiteIndex++;
             }
@@ -89,14 +89,14 @@ public class Piece_Display : MonoBehaviour
             
         }
     }
-    Sprite GetSprite(Piece_Data piece)
+    Sprite GetSprite(Piece piece)
     {
         //TODO: Health could be bigger than 2 in the future
         switch (piece.GetColor()) {
-            case Piece_Data.Color.white:
+            case Piece.Color.white:
                 if (piece.health == 1) return chessMoves_Dictionary[piece.type].spriteWhiteDamaged;
                 else return chessMoves_Dictionary[piece.type].spriteWhiteNoDamage;
-            case Piece_Data.Color.black:
+            case Piece.Color.black:
                 if (piece.health == 1) return chessMoves_Dictionary[piece.type].spriteBlackDamaged;
                 else return chessMoves_Dictionary[piece.type].spriteBlackNoDamage;
             default:
@@ -108,15 +108,15 @@ public class Piece_Display : MonoBehaviour
     {
         return chessMoves[i];
     }
-    public Chess_Move_SO GetChessMoveByType(Piece_Data.Type type)
+    public Chess_Move_SO GetChessMoveByType(Piece.Type type)
     {
         return chessMoves_Dictionary[type];
     }
 
-    GameObject GetGameObjectAtPosition(Piece_Data selectedPiece)
+    GameObject GetGameObjectAtPosition(Piece selectedPiece)
     {
         Vector3 targetPosition = Piece_Detection.BoardIndextoWorld(selectedPiece.positionOnBoard);
-        if(selectedPiece.GetColor() == Piece_Data.Color.white) {
+        if(selectedPiece.GetColor() == Piece.Color.white) {
             foreach (GameObject piece in whitePieceGameObjectList) {
                 if(piece.transform.position == targetPosition) {
                     return piece;
@@ -133,7 +133,7 @@ public class Piece_Display : MonoBehaviour
         return null;
     }
 
-    public void TransformSelectedPiece(Piece_Data selectedPiece)
+    public void TransformSelectedPiece(Piece selectedPiece)
     {
         GetGameObjectAtPosition(selectedPiece).GetComponent<SpriteRenderer>().sprite = GetSprite(selectedPiece);
 
@@ -142,12 +142,12 @@ public class Piece_Display : MonoBehaviour
         
         OnPieceTransformed?.Invoke(this, e);
     }
-    void OnPieceRemoved(object sender, Board_Data.EventArgsPieceRemoved e)
+    void OnPieceRemoved(object sender, Board.EventArgsPieceRemoved e)
     {
         GetGameObjectAtPosition(e.removedPiece).SetActive(false);//Probably unecessary
         UpdatePieces();
     }
-    void OnPieceDamaged(object sender, Board_Data.EventArgsPieceDamaged e)
+    void OnPieceDamaged(object sender, Board.EventArgsPieceDamaged e)
     {
         UpdatePieces();
     }

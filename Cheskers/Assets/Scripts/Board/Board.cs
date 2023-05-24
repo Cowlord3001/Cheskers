@@ -4,29 +4,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Board_Data
+public class Board
 {
     //Singleton
-    public static Board_Data instance;
+    public static Board instance;
 
     public string debugMessage;
     /// <summary>
     /// This is a dictionary linking vector2Int positions to pieces. values null if not accepted
     /// </summary>
-    public Dictionary<Vector2Int, Piece_Data> boardPieces { get; private set; }
+    public Dictionary<Vector2Int, Piece> boardPieces { get; private set; }
     public int size { get; private set; }
 
     //Event for when pieces are removed from board in case we want some effect to play in another script
     public event EventHandler<EventArgsPieceRemoved> OnPieceRemovedFromBoard;
     public class EventArgsPieceRemoved : EventArgs {
-        public Piece_Data removedPiece;
+        public Piece removedPiece;
     }
 
     //Event for when a piece is damaged in case we want some effect to play in another script.
     public event EventHandler<EventArgsPieceDamaged> OnPieceDamaged;
     public class EventArgsPieceDamaged : EventArgs
     {
-        public Piece_Data damagedPiece;
+        public Piece damagedPiece;
     }
     //Add Event for when piece is moved
     public event EventHandler<EventArgsPieceMoved> OnPieceMoved;
@@ -37,9 +37,9 @@ public class Board_Data
     }
 
     ///public List<Piece_Data> pieceList { get; private set; }
-    public List<Piece_Data> GetPieces()
+    public List<Piece> GetPieces()
     {
-        List<Piece_Data> pieceList= new List<Piece_Data>();
+        List<Piece> pieceList= new List<Piece>();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 if (boardPieces[new Vector2Int(x,y)] != null) {
@@ -66,13 +66,13 @@ public class Board_Data
     public BoardFunction_MoveAndDamage boardFunction_moveAndDamage;
     public BoardFunction_MoveAndTake boardFunction_moveAndTake;
 
-    public Board_Data()
+    public Board()
     {
         debugMessage = "";
         size = 8;
         //boardPieces = new Piece_Data[size, size];
         boardPositions = new List<Vector2Int>();
-        boardPieces = new Dictionary<Vector2Int, Piece_Data> ();
+        boardPieces = new Dictionary<Vector2Int, Piece> ();
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
@@ -82,10 +82,10 @@ public class Board_Data
 
                 if (y <= 1) {
                     //boardPieces[x, y] = new Piece_Data(Piece_Data.Color.white, new Vector2Int(x, y));
-                    boardPieces.Add(position, new Piece_Data(Piece_Data.Color.white, position));
+                    boardPieces.Add(position, new Piece(Piece.Color.white, position));
                 }
                 else if (y >= size - 2) {
-                    boardPieces.Add(position, new Piece_Data(Piece_Data.Color.black, position));
+                    boardPieces.Add(position, new Piece(Piece.Color.black, position));
                     //boardPieces[x, y] = new Piece_Data(Piece_Data.Color.black, new Vector2Int(x, y));
                     //pieceList.Add(boardPieces[x, y]);
                 }
@@ -135,7 +135,7 @@ public class Board_Data
             string[] stringPieces = line.Split(NEXTPIECE);
             foreach (string piece in stringPieces) {
                 if (piece != BLANK) {
-                    boardPieces[new Vector2Int(x,y)] = new Piece_Data(piece, new Vector2Int(x, y));
+                    boardPieces[new Vector2Int(x,y)] = new Piece(piece, new Vector2Int(x, y));
                 }
                 else {
                     boardPieces[new Vector2Int(x, y)] = null;
@@ -161,12 +161,12 @@ public class Board_Data
         boardPieces[new Vector2Int(x, y)].IsVIP = true;
     }
 
-    public List<Vector2Int> getAllLegalMoves(Piece_Data piece, Chess_Move_SO chessMoves)
+    public List<Vector2Int> getAllLegalMoves(Piece piece, Chess_Move_SO chessMoves)
     {
         piece.type = chessMoves.pieceType;
         List<Vector2Int> legalMoves = new List<Vector2Int>();
 
-        if (chessMoves.pieceType == Piece_Data.Type.pawn) {
+        if (chessMoves.pieceType == Piece.Type.pawn) {
             List<Vector2Int> extraPawnMoves = GetExtraPawnMoves(piece);
 
             if(extraPawnMoves.Count > 0) {
@@ -188,11 +188,11 @@ public class Board_Data
 
             //Pawn Logic! They can only move in one direction so skip move if its
             //The wrong direction. Can't move backwards
-            if (chessMoves.pieceType == Piece_Data.Type.pawn) {
-                if (piece.GetColor() == Piece_Data.Color.white && move.changeInY < 0) {
+            if (chessMoves.pieceType == Piece.Type.pawn) {
+                if (piece.GetColor() == Piece.Color.white && move.changeInY < 0) {
                     continue;
                 }
-                else if (piece.GetColor() == Piece_Data.Color.black && move.changeInY > 0) {
+                else if (piece.GetColor() == Piece.Color.black && move.changeInY > 0) {
                     continue;
                 }
                 //Only Pawns need this extra check but some checkers rules need this too???
@@ -255,7 +255,7 @@ public class Board_Data
         return legalMoves;
     }
 
-    List<Vector2Int> GetExtraPawnMoves(Piece_Data piece)
+    List<Vector2Int> GetExtraPawnMoves(Piece piece)
     {
         List<Vector2Int> ExtraMoves = new List<Vector2Int>();
         if(piece.hasMoved == false) {
@@ -266,7 +266,7 @@ public class Board_Data
 
             int moveValidateResult1;
             int moveValidateResult2;
-            if (piece.GetColor() == Piece_Data.Color.white) {
+            if (piece.GetColor() == Piece.Color.white) {
                 position.y++;
                 moveValidateResult1 = ValidMove(piece.GetColor(), position);
                 position.y++;
@@ -287,12 +287,12 @@ public class Board_Data
         //TODO: Detect en pessant
         return ExtraMoves;
     }
-    public void MoveAndTake(Piece_Data piece, Vector2Int newPosition)
+    public void MoveAndTake(Piece piece, Vector2Int newPosition)
     {
         boardFunction_moveAndTake.MoveAndTake(piece, newPosition);
     }
 
-    public void MoveAndDamage(Piece_Data piece, Vector2Int newPosition)
+    public void MoveAndDamage(Piece piece, Vector2Int newPosition)
     {
         boardFunction_moveAndDamage.MoveAndDamage(piece, newPosition);
     }
@@ -309,7 +309,7 @@ public class Board_Data
         OnPieceDamaged(this, e);
     }
 
-    public void MovePiece(Piece_Data piece, Vector2Int newPosition)
+    public void MovePiece(Piece piece, Vector2Int newPosition)
     {
         EventArgsPieceMoved e = new EventArgsPieceMoved();
         e.pieceStartBoardCordintaes = piece.positionOnBoard;
@@ -322,9 +322,9 @@ public class Board_Data
         piece.positionOnBoard = newPosition;
     }
 
-    public void ResetPieceType(Piece_Data piece)
+    public void ResetPieceType(Piece piece)
     {
-        piece.type = Piece_Data.Type.none;
+        piece.type = Piece.Type.none;
     }
 
     public void MovePieceNetworkCall(Vector2Int oldPosition, Vector2Int newPosition)
@@ -334,7 +334,7 @@ public class Board_Data
         MovePiece(boardPieces[oldPosition], newPosition);
     }
 
-    public void SwapPiecesExternal(Piece_Data piece1, Piece_Data piece2)
+    public void SwapPiecesExternal(Piece piece1, Piece piece2)
     {
         boardPieces[piece1.positionOnBoard] = piece2;
         boardPieces[piece2.positionOnBoard] = piece1;
@@ -353,7 +353,7 @@ public class Board_Data
         boardPieces[removePosition] = null;
     }
 
-    public int ValidMove(Piece_Data.Color color, Vector2Int newPosition)
+    public int ValidMove(Piece.Color color, Vector2Int newPosition)
     {
         if(boardPieces.ContainsKey(newPosition) == false) {
             return MOVING_TO_ILLIGAL_SPACE;

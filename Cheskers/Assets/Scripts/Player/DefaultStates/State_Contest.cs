@@ -2,16 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Piece_Controller;
+using static Turn_Manager;
 
 public class State_Contest : PlayerTurnState
 {
-    public State_Contest(Piece_Controller pieceController) : base(pieceController) { }
+    public State_Contest(Turn_Manager pieceController) : base(pieceController) { }
 
     public override void RunState()
     {
-        if (Board_Data.instance.boardPieces[pieceController.DecidedMove] == null ||
-            Board_Data.instance.boardPieces[pieceController.DecidedMove].health == 1) {
+        if (Board.instance.boardPieces[pieceController.DecidedMove] == null ||
+            Board.instance.boardPieces[pieceController.DecidedMove].health == 1) {
             //Skip Contest Phase
             pieceController.CoinFlip = UnityEngine.Random.Range(0, 2);
             pieceController.SetPhaseInTurn(PhaseInTurn.MOVE_AND_UPDATE);
@@ -19,8 +19,8 @@ public class State_Contest : PlayerTurnState
             return;
         }
 
-        if (Input_Controller.instance.WhitePlayerHasTokens() == false &&
-            Input_Controller.instance.BlackPlayerHasTokens() == false) {
+        if (Token_Manager.instance.WhitePlayerHasTokens() == false &&
+            Token_Manager.instance.BlackPlayerHasTokens() == false) {
             pieceController.CoinFlip = UnityEngine.Random.Range(0, 2);
             pieceController.SetPhaseInTurn(PhaseInTurn.MOVE_AND_UPDATE);
             pieceController.AdvanceGame();

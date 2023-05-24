@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Piece_Data
+public class Piece
 {
     //public GameObject gameObject;
     public Vector2Int positionOnBoard;
@@ -24,7 +24,7 @@ public class Piece_Data
         return color;
     }
 
-    public Piece_Data(Color color, Vector2Int positionOnBoard)
+    public Piece(Color color, Vector2Int positionOnBoard)
     {
         this.positionOnBoard = positionOnBoard;
         this.color = color;
@@ -39,7 +39,7 @@ public class Piece_Data
     const char NOT = 'N';
     //WVDM white piece that has been damaged and moved
     //WNNN white piece that is not the VIP and has not moved and has not been damaged
-    public Piece_Data(string stringCode, Vector2Int positionOnBoard)
+    public Piece(string stringCode, Vector2Int positionOnBoard)
     {
         this.positionOnBoard = positionOnBoard;
 

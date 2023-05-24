@@ -4,8 +4,8 @@ using UnityEngine;
 
 public abstract class PlayerTurnState 
 {
-    protected Piece_Controller pieceController;
-    public PlayerTurnState(Piece_Controller pieceController)
+    protected Turn_Manager pieceController;
+    public PlayerTurnState(Turn_Manager pieceController)
     {
         this.pieceController = pieceController;
     }

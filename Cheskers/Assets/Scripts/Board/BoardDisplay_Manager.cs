@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.Data;
 using UnityEngine;
 
-public class Board_Display : MonoBehaviour
+public class BoardDisplay_Manager : MonoBehaviour
 {
     [SerializeField] GameObject blackTile;
     [SerializeField] GameObject whiteTile;
 
-    public static Board_Display instance;
+    public static BoardDisplay_Manager instance;
 
     public GameObject[,] boardTiles { get; private set; }
 
@@ -35,12 +35,12 @@ public class Board_Display : MonoBehaviour
     void CreateBoard()
     {
 
-        boardTiles = new GameObject[Board_Data.instance.size, Board_Data.instance.size];
-        float halfWidth = Board_Data.instance.size / 2;
+        boardTiles = new GameObject[Board.instance.size, Board.instance.size];
+        float halfWidth = Board.instance.size / 2;
         float tileWidth = .5f;
         bool isWhite = true;
-        for (int y = 0; y < Board_Data.instance.size; y++) {
-            for (int x = 0; x < Board_Data.instance.size; x++) {
+        for (int y = 0; y < Board.instance.size; y++) {
+            for (int x = 0; x < Board.instance.size; x++) {
                 if(isWhite == true) {
                     isWhite = false;
                     GameObject go = Instantiate(whiteTile);
@@ -64,7 +64,7 @@ public class Board_Display : MonoBehaviour
     public void HighLightPossibleMoves(List<Vector2Int> validMoves)
     {
         foreach (Vector2Int moveLocation in validMoves) {
-            SpriteRenderer spriteRenderer = Board_Display.instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            SpriteRenderer spriteRenderer = BoardDisplay_Manager.instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, .1f);
         }
 
@@ -81,7 +81,7 @@ public class Board_Display : MonoBehaviour
         }
 
         foreach (Vector2Int moveLocation in validMoves) {
-            SpriteRenderer spriteRenderer = Board_Display.instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
+            SpriteRenderer spriteRenderer = BoardDisplay_Manager.instance.boardTiles[moveLocation.x, moveLocation.y].GetComponent<SpriteRenderer>();
             spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 1f);
         }
 

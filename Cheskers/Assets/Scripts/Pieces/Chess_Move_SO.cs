@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "ChessMoveSet")]
 public class Chess_Move_SO : ScriptableObject
 {
-    public Piece_Data.Type pieceType;
+    public Piece.Type pieceType;
 
     public Sprite spriteBlackNoDamage;
     public Sprite spriteBlackDamaged;

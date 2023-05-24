@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class State_PieceConfirmation_Comformity : State_PieceConfirmation
 {
-    Piece_Data.Type pieceType;
+    Piece.Type pieceType;
 
-    public State_PieceConfirmation_Comformity(Piece_Controller controller, Piece_Data.Type pieceType) : base(controller)
+    public State_PieceConfirmation_Comformity(Turn_Manager controller, Piece.Type pieceType) : base(controller)
     {
         this.pieceType = pieceType;
     }
@@ -18,7 +18,7 @@ public class State_PieceConfirmation_Comformity : State_PieceConfirmation
 
     protected override Chess_Move_SO PickChessMove()
     {
-        return Piece_Display.instance.GetChessMoveByType(pieceType);
+        return PieceDisplay_Manager.instance.GetChessMoveByType(pieceType);
     }
 
 }

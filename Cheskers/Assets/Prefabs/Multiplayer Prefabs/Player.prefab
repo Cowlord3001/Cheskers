@@ -43,18 +43,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1955741484988690965}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 053adca53bfe5114da46f87e64828f60, type: 3}
+  m_Script: {fileID: 11500000, guid: 81ce186d176940e4ebde155b889f1bcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chessMoves:
-  - {fileID: 11400000, guid: 1bcc147ff12abcb4bb7cb0220c2bdc4b, type: 2}
-  - {fileID: 11400000, guid: 3721e2788b84760438cde65d7ee67fa6, type: 2}
-  - {fileID: 11400000, guid: 4465c50de0fffd7438027f46837d2a9c, type: 2}
-  - {fileID: 11400000, guid: d61dae48f7219b34c891545c1005597a, type: 2}
-  - {fileID: 11400000, guid: 7ee74989e6d254845868b933bf028cbc, type: 2}
-  - {fileID: 11400000, guid: 8f4c4c13264246840874675ffae038c3, type: 2}
   highLightGraphicPrefab: {fileID: 3915542236710677809, guid: 12523e75c9c676942b90440c8c9ac8de, type: 3}
-  color: 1
 --- !u!114 &8724187629227269167
 MonoBehaviour:
   m_ObjectHideFlags: 0

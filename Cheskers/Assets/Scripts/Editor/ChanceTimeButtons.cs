@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(ChanceTime_Controller))]
+[CustomEditor(typeof(ChanceTime_Manager))]
 public class ChanceTimeButtons : Editor
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        ChanceTime_Controller settings = (ChanceTime_Controller)target;
+        ChanceTime_Manager settings = (ChanceTime_Manager)target;
         if (GUILayout.Button("1: SuddenDeath")) {
             settings.ChanceTime1_SuddentDeath();
         }

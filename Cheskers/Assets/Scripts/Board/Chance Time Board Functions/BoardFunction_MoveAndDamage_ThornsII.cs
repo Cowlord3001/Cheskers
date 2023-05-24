@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BoardFunction_MoveAndDamage_ThornsII : BoardFunction_MoveAndDamage
 {
-    protected override void CallDamagePiece(Piece_Data piece, Vector2Int targetPiecePosition)
+    protected override void CallDamagePiece(Piece piece, Vector2Int targetPiecePosition)
     {
-        Board_Data.instance.DamagePiece(targetPiecePosition);
-        Board_Data.instance.DamagePiece(piece.positionOnBoard);
+        Board.instance.DamagePiece(targetPiecePosition);
+        Board.instance.DamagePiece(piece.positionOnBoard);
     }
 }

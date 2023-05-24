@@ -5,11 +5,11 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Input_Controller : MonoBehaviour
+public class Input_Manager : MonoBehaviour
 {
     //MULTIPLAYER TODO: Inputs only fire when it is your turn
     //^May not be necassary anymore, still not a bad idea
-    public static Input_Controller instance;
+    public static Input_Manager instance;
     [HideInInspector] public Vector3 mouseWorldPosition;
     [HideInInspector] public Vector2Int mouseBoardPosition;
 
@@ -21,7 +21,7 @@ public class Input_Controller : MonoBehaviour
     public event EventHandler<EventArgsOnContestButtonClicked> OnContestButton2Clicked;
     public class EventArgsOnContestButtonClicked : EventArgs
     {
-        public Piece_Data.Color colorOfPresser;
+        public Piece.Color colorOfPresser;
     }
 
     public event EventHandler OnDeclineButtonClicked;
@@ -29,18 +29,6 @@ public class Input_Controller : MonoBehaviour
 
     [SerializeField] Button endTurn;
     [SerializeField] Button rerollPieceButton;
-
-    [Header("ReRollButtonSettings")]
-    /// <summary>
-    /// This holds the black buttons that belong to the whilte player
-    /// </summary>
-    [SerializeField] GameObject blackTokenImageHolder;
-    [SerializeField] GameObject blackTokenImage;
-    /// <summary>
-    /// This holds the white buttons that belong to the black player
-    /// </summary>
-    [SerializeField] GameObject whiteTokenImageHolder;
-    [SerializeField] GameObject whiteTokenImage;
 
     [Header("ContestSettings")]
     [SerializeField] GameObject contestHolder;
@@ -52,65 +40,7 @@ public class Input_Controller : MonoBehaviour
 
     [SerializeField] Text contestText;
     [SerializeField] Text contest2Text;
-    #region TokenTracking
-    /// <summary>
-    /// White Tokens are owned by the black player
-    /// </summary>
-    int whiteTokens = 0;
-    /// <summary>
-    /// Black tokens are owned by the white player
-    /// </summary>
-    int blackTokens = 0;
-
-    public int GetBlackTokenNumber(){ return blackTokens;}
-    public int GetWhiteTokenNumber(){ return whiteTokens;}
-
-    public void ClearTokens()
-    {
-        for (int i = 0; i < whiteTokens; i++) {
-            RemoveWhiteToken();
-        }
-
-        for (int i = 0; i < blackTokens; i++) {
-            RemoveBlackToken();
-        }
-    }
-
-    /// <summary>
-    /// Gives a token to the player with the corrsponding color.
-    /// </summary>
-    /// <param name="color"></param>
-    public void GiveContestToken(Piece_Data.Color color)
-    {
-        //You can't get a token if its the other players turn.
-        //If its white's turn and they lose a piece to something like thorns black should not get a token
-        //if color does not equal the turn color no token given
-        //This is called from remove piece events and needs protection
-        if(Network_Controller.instance.isMultiplayerGame) {
-            //multiplayer
-            if (color != Network_Controller.instance.turnColor.Value) return;
-        }
-        else {
-            //single player
-            if (color != Piece_Controller.instance.GetColor()) return;
-        }
-
-        GiveToken(color);
-    }
-
-    public void GiveToken(Piece_Data.Color color)
-    {
-        if (color == Piece_Data.Color.white) {
-            GameObject go = Instantiate(blackTokenImage, blackTokenImageHolder.transform);
-            blackTokens++;
-        }
-        else {
-            GameObject go = Instantiate(whiteTokenImage, whiteTokenImageHolder.transform);
-            whiteTokens++;
-        }
-    }
-
-    #endregion
+    
     private void Awake()
     {
         instance = this;
@@ -118,7 +48,6 @@ public class Input_Controller : MonoBehaviour
 
     private void Start()
     {
-        Board_Data.instance.OnPieceRemovedFromBoard += OnPieceRemovedFromBoardListener;
         contestHolder.SetActive(false);
         contest2Holder.SetActive(false);
 
@@ -127,7 +56,7 @@ public class Input_Controller : MonoBehaviour
 
         contestButton.onClick.AddListener(() => ButtonPressedContest());
         declineButton.onClick.AddListener(() => ButtonPressedDecline());
-        if (Network_Controller.instance.isMultiplayerGame == true) { return; }
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) { return; }
 
         //Debug.Log("Setting up second contest buttons");
         contest2Button.onClick.AddListener(() => Button2PressedContest());
@@ -151,8 +80,8 @@ public class Input_Controller : MonoBehaviour
     private void Update()
     {
         if (developerCommandsEnabled) {
-            if (Input.GetKeyDown(KeyCode.LeftBracket)) { GiveContestToken(Piece_Data.Color.black); }
-            if (Input.GetKeyDown(KeyCode.RightBracket)) { GiveContestToken(Piece_Data.Color.white); }
+            if (Input.GetKeyDown(KeyCode.LeftBracket)) { Token_Manager.instance.GiveContestToken(Piece.Color.black); }
+            if (Input.GetKeyDown(KeyCode.RightBracket)) { Token_Manager.instance.GiveContestToken(Piece.Color.white); }
         }
         if (Input.GetKeyDown(KeyCode.R)) { OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty); }
 
@@ -166,7 +95,7 @@ public class Input_Controller : MonoBehaviour
         mouseWorldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseBoardPosition = Piece_Detection.WorldtoBoardIndex(mouseWorldPosition);
         if (Input.GetMouseButtonDown(0)) {
-            float halfWidth = Board_Data.instance.size / 2;
+            float halfWidth = Board.instance.size / 2;
             //Only count clicks on the board to prevent button double clicks
             if (mouseWorldPosition.x < halfWidth &&
                 mouseWorldPosition.x > -halfWidth &&
@@ -178,37 +107,6 @@ public class Input_Controller : MonoBehaviour
         }
     }
 
-    void OnPieceRemovedFromBoardListener(object sender, Board_Data.EventArgsPieceRemoved e)
-    {
-        if(e.removedPiece.GetColor() == Piece_Data.Color.white) {
-            GiveContestToken(Piece_Data.Color.black);
-        }
-        else {
-            GiveContestToken(Piece_Data.Color.white);
-        }
-    }
-
-    public bool WhitePlayerHasTokens()
-    {
-        if (blackTokens == 0) return false;
-        else return true;
-    }
-    public bool BlackPlayerHasTokens()
-    {
-        if (whiteTokens == 0) return false;
-        else return true;
-    }
-
-    void RemoveBlackToken()
-    {
-        blackTokens--;
-        Destroy(blackTokenImageHolder.transform.GetChild(0).gameObject);
-    }
-    void RemoveWhiteToken()
-    {
-        whiteTokens--;
-        Destroy(whiteTokenImageHolder.transform.GetChild(0).gameObject);
-    }
     void ButtonPressedReroll()
     {
         OnRollAgainButtonClicked?.Invoke(this, EventArgs.Empty);
@@ -217,17 +115,17 @@ public class Input_Controller : MonoBehaviour
     void ButtonPressedContest()
     {
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
-        e.colorOfPresser = Piece_Controller.instance.GetPlayerColor();
-        if (Network_Controller.instance.isMultiplayerGame == false) { 
-            e.colorOfPresser = Piece_Data.Color.white; 
+        e.colorOfPresser = Turn_Manager.instance.GetPlayerColor();
+        if (Multiplayer_Manager.instance.isMultiplayerGame == false) { 
+            e.colorOfPresser = Piece.Color.white; 
         }
 
-        if (e.colorOfPresser == Piece_Data.Color.white && blackTokens > 0) {
-            RemoveBlackToken();
+        if (e.colorOfPresser == Piece.Color.white && Token_Manager.instance.WhitePlayerHasTokens()) {
+            Token_Manager.instance.RemoveBlackToken();
             OnContestButtonClicked?.Invoke(this, e);
         }
-        else if (e.colorOfPresser == Piece_Data.Color.black && whiteTokens > 0) {
-            RemoveWhiteToken();
+        else if (e.colorOfPresser == Piece.Color.black && Token_Manager.instance.BlackPlayerHasTokens()) {
+            Token_Manager.instance.RemoveWhiteToken();
             OnContestButtonClicked?.Invoke(this, e);
         }
     }
@@ -244,10 +142,10 @@ public class Input_Controller : MonoBehaviour
     void Button2PressedContest()
     {
         EventArgsOnContestButtonClicked e = new EventArgsOnContestButtonClicked();
-        e.colorOfPresser = Piece_Data.Color.black;
+        e.colorOfPresser = Piece.Color.black;
 
-        if (e.colorOfPresser == Piece_Data.Color.black && whiteTokens > 0) {
-            RemoveWhiteToken();
+        if (e.colorOfPresser == Piece.Color.black && Token_Manager.instance.BlackPlayerHasTokens()) {
+            Token_Manager.instance.RemoveWhiteToken();
             OnContestButton2Clicked?.Invoke(this, e);
         }
     }
@@ -276,8 +174,8 @@ public class Input_Controller : MonoBehaviour
 
     void ButtonPressedEndTurn()
     {
-        Debug.Log(Piece_Controller.instance.phaseInTurn);
-        if (Piece_Controller.instance.phaseInTurn == Piece_Controller.PhaseInTurn.WAITING_FOR_TURN) 
+        Debug.Log(Turn_Manager.instance.phaseInTurn);
+        if (Turn_Manager.instance.phaseInTurn == Turn_Manager.PhaseInTurn.WAITING_FOR_TURN) 
         { 
             return; 
         }
@@ -301,7 +199,7 @@ public class Input_Controller : MonoBehaviour
         else {
             contestText.text = "Piece Damage";
         }
-        if (Network_Controller.instance.isMultiplayerGame == true) { return; }
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) { return; }
 
         contest2Holder.SetActive(true);
         if (coinFlip == CAPTURE) {

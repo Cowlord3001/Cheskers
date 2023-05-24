@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class BoardFunction_MoveAndDamage
 {
-    public void MoveAndDamage(Piece_Data piece, Vector2Int newPosition)
+    public void MoveAndDamage(Piece piece, Vector2Int newPosition)
     {
-        if (Board_Data.instance.boardPieces[newPosition] == null) {
-            Board_Data.instance.MovePiece(piece, newPosition);
-            Board_Data.instance.ResetPieceType(piece);
+        if (Board.instance.boardPieces[newPosition] == null) {
+            Board.instance.MovePiece(piece, newPosition);
+            Board.instance.ResetPieceType(piece);
             return;
         }
-        if (Board_Data.instance.boardPieces[newPosition].health == 1) {
-            Board_Data.instance.MoveAndTake(piece, newPosition);
-            Board_Data.instance.ResetPieceType(piece);
+        if (Board.instance.boardPieces[newPosition].health == 1) {
+            Board.instance.MoveAndTake(piece, newPosition);
+            Board.instance.ResetPieceType(piece);
             return;
         }
-        if (piece.type == Piece_Data.Type.knight ||
-            piece.type == Piece_Data.Type.pawn ||
-            piece.type == Piece_Data.Type.king) {
+        if (piece.type == Piece.Type.knight ||
+            piece.type == Piece.Type.pawn ||
+            piece.type == Piece.Type.king) {
             CallDamagePiece(piece, newPosition);
         }
         else {
@@ -32,17 +32,17 @@ public class BoardFunction_MoveAndDamage
 
             }
             else {
-                Board_Data.instance.MovePiece(piece, newPosition - deltaPosition);
+                Board.instance.MovePiece(piece, newPosition - deltaPosition);
             }
 
             CallDamagePiece(piece, newPosition);
         }
-        Board_Data.instance.ResetPieceType(piece);
+        Board.instance.ResetPieceType(piece);
     }
 
-    protected virtual void CallDamagePiece(Piece_Data piece, Vector2Int targetPiecePosition)
+    protected virtual void CallDamagePiece(Piece piece, Vector2Int targetPiecePosition)
     {
-        Board_Data.instance.DamagePiece(targetPiecePosition);
+        Board.instance.DamagePiece(targetPiecePosition);
     }
 
 }

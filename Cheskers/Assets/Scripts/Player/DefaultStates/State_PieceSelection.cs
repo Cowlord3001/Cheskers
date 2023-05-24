@@ -1,18 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Piece_Controller;
+using static Turn_Manager;
 
 public class State_PieceSelection : PlayerTurnState
 {
-    public State_PieceSelection(Piece_Controller pieceController) : base(pieceController) { }
+    public State_PieceSelection(Turn_Manager pieceController) : base(pieceController) { }
 
     public override void RunState()
     {
-        Piece_Data piece = Piece_Detection.GetPieceUnderMouse();
+        Piece piece = Piece_Detection.GetPieceUnderMouse();
         if (piece != null) {
             //DEV COMMAND USED
-            if (piece.GetColor() != pieceController.GetColor() && Input_Controller.developerCommandsEnabled == false) { return; }
+            if (piece.GetColor() != pieceController.GetColor() && Input_Manager.developerCommandsEnabled == false) { return; }
             pieceController.SelectedPiece = piece;
 
             //Debug.Log(selectedPiece.gameObject.name);

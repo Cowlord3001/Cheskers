@@ -18,7 +18,7 @@ public class Multiplater_UI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (Network_Controller.instance.isMultiplayerGame == true) {
+        if (Multiplayer_Manager.instance.isMultiplayerGame == true) {
             hostButton.onClick.AddListener(() =>
             {
                 GetComponent<NetworkManager>().StartHost();
@@ -42,13 +42,13 @@ public class Multiplater_UI : MonoBehaviour
     void GameHosted()
     {
         OnGameHosted?.Invoke(this, EventArgs.Empty);
-        Debug.Log(Network_Controller.instance.isMultiplayerGame);
+        Debug.Log(Multiplayer_Manager.instance.isMultiplayerGame);
     }
 
     void ClinetJoined()
     {
         OnGameClientJoined?.Invoke(this, EventArgs.Empty);
-        Debug.Log(Network_Controller.instance.isMultiplayerGame);
+        Debug.Log(Multiplayer_Manager.instance.isMultiplayerGame);
     }
 
 }

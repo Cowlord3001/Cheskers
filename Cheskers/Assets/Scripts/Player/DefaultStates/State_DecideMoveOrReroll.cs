@@ -1,15 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Piece_Controller;
+using static Turn_Manager;
 
 public class State_DecideMoveOrReroll : PlayerTurnState
 {
-    public State_DecideMoveOrReroll(Piece_Controller pieceController) : base(pieceController) { }
+    public State_DecideMoveOrReroll(Turn_Manager pieceController) : base(pieceController) { }
 
     public override void RunState()
     {
-        pieceController.DecidedMove = Input_Controller.instance.mouseBoardPosition;
+        pieceController.DecidedMove = Input_Manager.instance.mouseBoardPosition;
         foreach (var move in pieceController.ValidMoves) {
             if (pieceController.DecidedMove == move) {
                 //Starts the first contest

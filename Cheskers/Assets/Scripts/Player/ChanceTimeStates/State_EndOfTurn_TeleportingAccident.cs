@@ -2,31 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditorInternal;
 using UnityEngine;
-using static Piece_Controller;
+using static Turn_Manager;
 
 public class State_EndOfTurn_TeleportingAccident : State_EndOfTurn
 {
-    public State_EndOfTurn_TeleportingAccident(Piece_Controller pieceController) : base(pieceController) { }
+    public State_EndOfTurn_TeleportingAccident(Turn_Manager pieceController) : base(pieceController) { }
 
     public override void RunState()
     {
-        if (pieceController.GetColor() == Piece_Data.Color.white) {
+        if (pieceController.GetColor() == Piece.Color.white) {
             //It's whites end of turn so black VIP must be teleported.
-            SwapVIP(Piece_Data.Color.black);
+            SwapVIP(Piece.Color.black);
         }
         else {
-            SwapVIP(Piece_Data.Color.white);
+            SwapVIP(Piece.Color.white);
         }
 
         base.RunState();
     }
 
-    public void SwapVIP(Piece_Data.Color color)
+    public void SwapVIP(Piece.Color color)
     {
         //It's whites end of turn so black VIP must be teleported.
-        Piece_Data targetPiece = null;
-        Piece_Data VIP = null;
-        List<Piece_Data> pieces = Board_Data.instance.GetPieces();
+        Piece targetPiece = null;
+        Piece VIP = null;
+        List<Piece> pieces = Board.instance.GetPieces();
 
         Debug.Log("Turn Color: " + pieceController.GetColor());
         Debug.Log("Search Color: " + color);
@@ -49,7 +49,7 @@ public class State_EndOfTurn_TeleportingAccident : State_EndOfTurn
         }
 
 
-        Board_Data.instance.SwapPiecesExternal(targetPiece, VIP);
-        Piece_Display.instance.UpdatePieces();
+        Board.instance.SwapPiecesExternal(targetPiece, VIP);
+        PieceDisplay_Manager.instance.UpdatePieces();
     }
 }

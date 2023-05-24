@@ -1,20 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Piece_Controller;
+using static Turn_Manager;
 
 public class State_EndOfTurn : PlayerTurnState
 {
-    public State_EndOfTurn(Piece_Controller pieceController) : base(pieceController) { }
+    public State_EndOfTurn(Turn_Manager pieceController) : base(pieceController) { }
 
     public override void RunState()
     {
         pieceController.Rerolled = false;
         pieceController.SetPhaseInTurn( PhaseInTurn.WAITING_FOR_TURN );
-        pieceController.SelectedPiece.type = Piece_Data.Type.none;
+        pieceController.SelectedPiece.type = Piece.Type.none;
 
         if(pieceController.PreviouslySelectedPiece != null)
-            pieceController.PreviouslySelectedPiece.type = Piece_Data.Type.none;
+            pieceController.PreviouslySelectedPiece.type = Piece.Type.none;
 
         pieceController.UpdateBoardAndPieceGraphics();
         pieceController.SendEndOfTurnEvent();
