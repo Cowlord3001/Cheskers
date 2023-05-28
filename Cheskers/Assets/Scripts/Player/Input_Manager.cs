@@ -40,7 +40,17 @@ public class Input_Manager : MonoBehaviour
 
     [SerializeField] Text contestText;
     [SerializeField] Text contest2Text;
-    
+
+    [Header("DeveloperButtons")]
+    [SerializeField] Button pawnButton;
+    [SerializeField] Button bishopButton;
+    [SerializeField] Button knightButton;
+    [SerializeField] Button rookButton;
+    [SerializeField] Button queenButton;
+    [SerializeField] Button kingButton;
+
+    [SerializeField] GameObject pieceDecider;
+
     private void Awake()
     {
         instance = this;
@@ -61,6 +71,13 @@ public class Input_Manager : MonoBehaviour
         //Debug.Log("Setting up second contest buttons");
         contest2Button.onClick.AddListener(() => Button2PressedContest());
         decline2Button.onClick.AddListener(() => Button2PressedDecline());
+
+        pawnButton.onClick.AddListener(() => setPiece(Piece.Type.pawn));
+        bishopButton.onClick.AddListener(() => setPiece(Piece.Type.bishop));
+        knightButton.onClick.AddListener(() => setPiece(Piece.Type.knight));
+        rookButton.onClick.AddListener(() => setPiece(Piece.Type.rook));
+        queenButton.onClick.AddListener(() => setPiece(Piece.Type.queen));
+        kingButton.onClick.AddListener(() => setPiece(Piece.Type.king));
     }
 
     #region DevControls
@@ -74,6 +91,16 @@ public class Input_Manager : MonoBehaviour
     //CHOOSE PIECE 
     //OVERRIDE TURN (DONE)
 
+    void setPiece(Piece.Type type)
+    {
+        Debug.Log("AAAAAaa");   // Something broke ;-;
+        if(Turn_Manager.instance.phaseInTurn == Turn_Manager.PhaseInTurn.PIECE_CONFIRMATION)
+        {
+            Turn_Manager.instance.SwapState(Turn_Manager.PhaseInTurn.PIECE_CONFIRMATION, new State_PieceConfirmation_PieceOverride(Turn_Manager.instance, type));
+            Turn_Manager.instance.AdvanceGame();
+            Turn_Manager.instance.SwapState(Turn_Manager.PhaseInTurn.PIECE_CONFIRMATION, new State_PieceConfirmation(Turn_Manager.instance));
+        }
+    }
 
     #endregion
 
@@ -87,6 +114,7 @@ public class Input_Manager : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.P)) {
             developerCommandsEnabled = !developerCommandsEnabled;
+            pieceDecider.SetActive(!pieceDecider.activeSelf);
         }
 
         //Temporary till hosting scene is seperate.
