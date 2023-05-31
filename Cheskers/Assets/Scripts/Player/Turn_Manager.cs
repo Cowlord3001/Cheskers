@@ -69,6 +69,7 @@ public class Turn_Manager : NetworkBehaviour
                 pieceSelection = newState;
                 break;
             case PhaseInTurn.PIECE_CONFIRMATION:
+                Debug_Manager.instance.Log(Debug_Manager.type.PlayerCurrentState, "Swapping Piece_confirmation State");
                 pieceConfirmation = newState;
                 break;
             case PhaseInTurn.DECIDE_MOVE_OR_REROLL:

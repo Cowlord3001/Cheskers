@@ -72,12 +72,13 @@ public class Input_Manager : MonoBehaviour
         contest2Button.onClick.AddListener(() => Button2PressedContest());
         decline2Button.onClick.AddListener(() => Button2PressedDecline());
 
-        pawnButton.onClick.AddListener(() => setPiece(Piece.Type.pawn));
-        bishopButton.onClick.AddListener(() => setPiece(Piece.Type.bishop));
-        knightButton.onClick.AddListener(() => setPiece(Piece.Type.knight));
-        rookButton.onClick.AddListener(() => setPiece(Piece.Type.rook));
-        queenButton.onClick.AddListener(() => setPiece(Piece.Type.queen));
-        kingButton.onClick.AddListener(() => setPiece(Piece.Type.king));
+        pieceDecider.SetActive(false);
+        pawnButton.onClick.AddListener(() => SetPiece(Piece.Type.pawn));
+        bishopButton.onClick.AddListener(() => SetPiece(Piece.Type.bishop));
+        knightButton.onClick.AddListener(() => SetPiece(Piece.Type.knight));
+        rookButton.onClick.AddListener(() => SetPiece(Piece.Type.rook));
+        queenButton.onClick.AddListener(() => SetPiece(Piece.Type.queen));
+        kingButton.onClick.AddListener(() => SetPiece(Piece.Type.king));
     }
 
     #region DevControls
@@ -91,9 +92,8 @@ public class Input_Manager : MonoBehaviour
     //CHOOSE PIECE 
     //OVERRIDE TURN (DONE)
 
-    void setPiece(Piece.Type type)
+    void SetPiece(Piece.Type type)
     {
-        Debug.Log("AAAAAaa");   // Something broke ;-;
         if(Turn_Manager.instance.phaseInTurn == Turn_Manager.PhaseInTurn.PIECE_CONFIRMATION)
         {
             Turn_Manager.instance.SwapState(Turn_Manager.PhaseInTurn.PIECE_CONFIRMATION, new State_PieceConfirmation_PieceOverride(Turn_Manager.instance, type));
